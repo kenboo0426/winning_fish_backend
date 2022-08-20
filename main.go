@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"winning_fish_backend/app/controllers"
+)
 
 func main() {
-	fmt.Println("ssss")
+	controllers.StartMainServer()
 }

@@ -5,6 +5,9 @@ import (
 	"winning_fish_backend/config"
 )
 
-func StartMainSever() error {
+func StartMainServer() error {
+	http.HandleFunc("/quizzes", indexQuiz)
+	http.HandleFunc("/quiz", HandleQuizRequst)
+
 	return http.ListenAndServe(":"+config.Config.Port, nil)
 }
