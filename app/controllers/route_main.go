@@ -23,11 +23,6 @@ func indexQuiz(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-func HandleQuizCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.PostFormValue("image"))
-	createQuiz(w, r)
-}
-
 func HandleQuizRequst(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
