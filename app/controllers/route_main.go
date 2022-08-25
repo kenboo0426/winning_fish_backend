@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 	"winning_fish_backend/app/models"
@@ -18,7 +19,13 @@ func indexQuiz(w http.ResponseWriter, r *http.Request) {
 	res, _ := json.Marshal(quizzes)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
 	w.Write(res)
+}
+
+func HandleQuizCreate(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.PostFormValue("image"))
+	createQuiz(w, r)
 }
 
 func HandleQuizRequst(w http.ResponseWriter, r *http.Request) {
