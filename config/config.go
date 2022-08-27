@@ -4,6 +4,7 @@ import (
 	"log"
 	"winning_fish_backend/utils"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/go-ini/ini.v1"
 )
 
@@ -18,6 +19,7 @@ var Config ConfigList
 
 func init() {
 	LoadConfig()
+	LoadEnv()
 	utils.LoggingSettings(Config.LogFile)
 }
 
@@ -31,5 +33,12 @@ func LoadConfig() {
 		SQLDriver: cfg.Section("db").Key("driver").String(),
 		DbName:    cfg.Section("db").Key("name").String(),
 		LogFile:   cfg.Section("web").Key("logfile").String(),
+	}
+}
+
+func LoadEnv() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalln(err)
 	}
 }

@@ -1,17 +1,18 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"time"
 )
 
 type Quiz struct {
-	ID          int
-	Image       string
-	CorrectID   int
-	CorrectRate float32
-	Level       int
-	CreatedAt   time.Time
+	ID          int       `jsonapi:"id"`
+	Image       string    `jsonapi:"image"`
+	CorrectID   int       `jsonapi:"correct_id"`
+	CorrectRate float32   `jsonapi:"correct_rate"`
+	Level       int       `jsonapi:"level"`
+	CreatedAt   time.Time `jsonapi:"created_at"`
 }
 
 func GetQuizzes() (quizzes []Quiz, err error) {
@@ -21,7 +22,7 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 		log.Fatalln(err)
 	}
 	for rows.Next() {
-		var quiz Quiz
+		quiz := &Quiz{}
 		err = rows.Scan(
 			&quiz.ID,
 			&quiz.Image,
@@ -33,7 +34,7 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		quizzes = append(quizzes, quiz)
+		quizzes = append(quizzes, *quiz)
 	}
 	rows.Close()
 	return quizzes, err
@@ -69,4 +70,30 @@ func (q *Quiz) CreateQuiz() (err error) {
 	}
 
 	return err
+}
+
+func (q *Quiz) UpdateQuiz(id int) (err error) {
+	updateQuiz, err := Db.Prepare(`update quizzes set image = ?,
+	                                                  correct_id = ?,
+	                                                  correct_rate = ?, 
+																										level = ?, 
+																										created_at = ? 
+																										where id = ?`)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.CorrectRate, q.Level, q.CreatedAt, id)
+
+	return err
+}
+
+func DeleteQuiz(id int) (quiz Quiz, err error) {
+	delete := "delete from quizzes where id = ?"
+
+	_, err = Db.Exec(delete, id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return quiz, err
 }
