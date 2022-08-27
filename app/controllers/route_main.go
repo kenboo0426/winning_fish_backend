@@ -43,11 +43,12 @@ func HandleQuizRequst(w http.ResponseWriter, r *http.Request) {
 func HandleQuizUpdateRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
 	switch r.Method {
 	case http.MethodGet:
 		showQuiz(w, r)
-	case http.MethodPost:
+	case http.MethodPut:
 		updateQuiz(w, r)
 	case http.MethodDelete:
 		deleteQuiz(w, r)
@@ -91,7 +92,24 @@ func createQuiz(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateQuiz(w http.ResponseWriter, r *http.Request) {
+	sub := strings.TrimPrefix(r.URL.Path, "/quiz")
+	_, id := filepath.Split(sub)
 
+	quiz_id, _ := strconv.Atoi(id)
+	quiz, err := models.GetQuiz(quiz_id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer r.Body.Close()
+	body, _ := io.ReadAll(r.Body)
+	if err := json.Unmarshal(body, &quiz); err != nil {
+		fmt.Println(err)
+	}
+	err = quiz.UpdateQuiz(quiz_id)
+
+	res, _ := json.Marshal(quiz)
+	w.Write(res)
 }
 
 func deleteQuiz(w http.ResponseWriter, r *http.Request) {

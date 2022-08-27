@@ -72,9 +72,25 @@ func (q *Quiz) CreateQuiz() (err error) {
 	return err
 }
 
+func (q *Quiz) UpdateQuiz(id int) (err error) {
+	updateQuiz, err := Db.Prepare(`update quizzes set image = ?,
+	                                                  correct_id = ?,
+	                                                  correct_rate = ?, 
+																										level = ?, 
+																										created_at = ? 
+																										where id = ?`)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.CorrectRate, q.Level, q.CreatedAt, id)
+
+	return err
+}
+
 func DeleteQuiz(id int) (quiz Quiz, err error) {
 	delete := "delete from quizzes where id = ?"
-	
+
 	_, err = Db.Exec(delete, id)
 	if err != nil {
 		fmt.Println(err)
