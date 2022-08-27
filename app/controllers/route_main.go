@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 	"winning_fish_backend/app/models"
 )
@@ -29,14 +31,8 @@ func HandleQuizRequst(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
 	switch r.Method {
-	case http.MethodGet:
-		showQuiz(w, r)
 	case http.MethodPost:
 		createQuiz(w, r)
-	case http.MethodPut:
-		updateQuiz(w, r)
-	case http.MethodDelete:
-		deleteQuiz(w, r)
 	case http.MethodOptions:
 		// handle preflight here
 	default:
@@ -44,14 +40,36 @@ func HandleQuizRequst(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func HandleQuizUpdateRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	switch r.Method {
+	case http.MethodGet:
+		showQuiz(w, r)
+	case http.MethodPost:
+		updateQuiz(w, r)
+	case http.MethodDelete:
+		deleteQuiz(w, r)
+	case http.MethodOptions:
+	// handle preflight here
+	default:
+		w.WriteHeader(405)
+	}
+}
+
 func showQuiz(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.Atoi(r.URL.Query()["id"][0])
-	quiz, err := models.GetQuiz(id)
+	sub := strings.TrimPrefix(r.URL.Path, "/quiz")
+	_, id := filepath.Split(sub)
+
+	quiz_id, _ := strconv.Atoi(id)
+	quiz, err := models.GetQuiz(quiz_id)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Println(quiz.ID)
+	res, _ := json.Marshal(quiz)
+	w.Write(res)
 }
 
 func createQuiz(w http.ResponseWriter, r *http.Request) {
@@ -77,5 +95,15 @@ func updateQuiz(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteQuiz(w http.ResponseWriter, r *http.Request) {
+	sub := strings.TrimPrefix(r.URL.Path, "/quiz")
+	_, id := filepath.Split(sub)
 
+	quiz_id, _ := strconv.Atoi(id)
+	quiz, err := models.DeleteQuiz(quiz_id)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	res, _ := json.Marshal(quiz)
+	w.Write(res)
 }

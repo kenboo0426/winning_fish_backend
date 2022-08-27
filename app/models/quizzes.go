@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"time"
 )
@@ -69,4 +70,14 @@ func (q *Quiz) CreateQuiz() (err error) {
 	}
 
 	return err
+}
+
+func DeleteQuiz(id int) (quiz Quiz, err error) {
+	delete := "delete from quizzes where id = ?"
+	
+	_, err = Db.Exec(delete, id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return quiz, err
 }
