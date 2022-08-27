@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -24,15 +25,20 @@ func indexQuiz(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleQuizRequst(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
 	switch r.Method {
-	case "GET":
+	case http.MethodGet:
 		showQuiz(w, r)
-	case "POST":
+	case http.MethodPost:
 		createQuiz(w, r)
-	case "PUT":
+	case http.MethodPut:
 		updateQuiz(w, r)
-	case "DELETE":
+	case http.MethodDelete:
 		deleteQuiz(w, r)
+	case http.MethodOptions:
+		// handle preflight here
 	default:
 		w.WriteHeader(405)
 	}
@@ -49,17 +55,21 @@ func showQuiz(w http.ResponseWriter, r *http.Request) {
 }
 
 func createQuiz(w http.ResponseWriter, r *http.Request) {
-	quiz := models.Quiz{
-		Image:       r.PostFormValue("image"),
-		CorrectID:   1,
-		CorrectRate: 1,
-		Level:       1,
-		CreatedAt:   time.Now(),
+	var quiz models.Quiz
+
+	defer r.Body.Close()
+	body, _ := io.ReadAll(r.Body)
+	if err := json.Unmarshal(body, &quiz); err != nil {
+		fmt.Println(err)
 	}
+	quiz.CreatedAt = time.Now()
+
 	err := quiz.CreateQuiz()
 	if err != nil {
 		log.Fatalln(err)
 	}
+	res, _ := json.Marshal(quiz)
+	w.Write(res)
 }
 
 func updateQuiz(w http.ResponseWriter, r *http.Request) {
