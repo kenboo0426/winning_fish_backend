@@ -59,12 +59,11 @@ func (q *Quiz) CreateQuiz() (err error) {
 	createQuiz := `insert into quizzes (
 		image,
 		correct_id,
-		correct_rate,
 		level,
 		created_at
 	) values(?, ?, ?, ?, ?)`
 
-	_, err = Db.Exec(createQuiz, q.Image, q.CorrectID, q.CorrectRate, q.Level, time.Now())
+	_, err = Db.Exec(createQuiz, q.Image, q.CorrectRate, q.Level, time.Now())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -75,7 +74,6 @@ func (q *Quiz) CreateQuiz() (err error) {
 func (q *Quiz) UpdateQuiz(id int) (err error) {
 	updateQuiz, err := Db.Prepare(`update quizzes set image = ?,
 	                                                  correct_id = ?,
-	                                                  correct_rate = ?, 
 																										level = ?, 
 																										created_at = ? 
 																										where id = ?`)
@@ -83,7 +81,7 @@ func (q *Quiz) UpdateQuiz(id int) (err error) {
 		log.Fatalln(err)
 	}
 
-	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.CorrectRate, q.Level, q.CreatedAt, id)
+	_, err = updateQuiz.Exec(q.Image, q.CorrectRate, q.Level, q.CreatedAt, id)
 
 	return err
 }
