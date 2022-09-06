@@ -11,7 +11,7 @@ type Quiz struct {
 	Image       string    `json:"image"`
 	CorrectID   int       `json:"correct_id"`
 	CorrectRate *float32  `json:"correct_rate"`
-	Level       int       `json:"level"`
+	Level       string    `json:"level"`
 	CreatedAt   time.Time `json:"created_at"`
 	Options     []Option  `json:"options"`
 }
@@ -53,6 +53,13 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 		&quiz.Level,
 		&quiz.CreatedAt,
 	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	quiz.Options, err = quiz.GetOptionsByQuiz()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	return quiz, err
 }

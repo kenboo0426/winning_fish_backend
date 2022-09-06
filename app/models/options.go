@@ -43,3 +43,12 @@ func (q *Quiz) CreateOptions() (correct_option_id int64, err error) {
 
 	return correct_option_id, err
 }
+
+func (q *Quiz) UpdateOptions() (err error) {
+	cmd := `update options set name = ?, quiz_id = ? where id = ?`
+	for _, option := range q.Options {
+		_, err = Db.Exec(cmd, option.Name, q.ID, option.ID)
+	}
+
+	return err
+}

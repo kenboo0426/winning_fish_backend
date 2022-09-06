@@ -111,6 +111,10 @@ func updateQuiz(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	err = quiz.UpdateQuiz()
+	err = quiz.UpdateOptions()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	res, _ := json.Marshal(quiz)
 	w.Write(res)
