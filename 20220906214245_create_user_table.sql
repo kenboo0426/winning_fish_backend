@@ -7,7 +7,7 @@ CREATE TABLE users (
 		password string,
 		rating float,
 		role ineter,
-		createdt datetime
+		created_at datetime
 );
 
 -- +goose Down
