@@ -5,9 +5,9 @@ import (
 )
 
 type Option struct {
-	ID     int
-	Name   string
-	QuizID int
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	QuizID int    `json:"quiz_id"`
 }
 
 func (q *Quiz) GetOptionsByQuiz() (options []Option, err error) {

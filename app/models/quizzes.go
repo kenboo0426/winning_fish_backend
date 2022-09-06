@@ -7,13 +7,13 @@ import (
 )
 
 type Quiz struct {
-	ID          int       `jsonapi:"id"`
-	Image       string    `jsonapi:"image"`
-	CorrectID   int       `jsonapi:"correct_id"`
-	CorrectRate *float32  `jsonapi:"correct_rate"`
-	Level       int       `jsonapi:"level"`
-	CreatedAt   time.Time `jsonapi:"created_at"`
-	Options     []Option  `jsonapi:"options"`
+	ID          int       `json:"id"`
+	Image       string    `json:"image"`
+	CorrectID   int       `json:"correct_id"`
+	CorrectRate *float32  `json:"correct_rate"`
+	Level       int       `json:"level"`
+	CreatedAt   time.Time `json:"created_at"`
+	Options     []Option  `json:"options"`
 }
 
 func GetQuizzes() (quizzes []Quiz, err error) {
