@@ -10,14 +10,14 @@ import (
 )
 
 type User struct {
-	ID        int
-	UUID      string
-	Name      string
-	Email     string
-	Password  string
-	Rating    float32
-	Role      int
-	CreatedAt time.Time
+	ID        int       `json:"id"`
+	UUID      string    `json:"uuid"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Rating    float32   `json:"rating"`
+	Role      int       `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (u *User) CreateUSer() (err error) {

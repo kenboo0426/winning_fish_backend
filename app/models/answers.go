@@ -3,10 +3,10 @@ package models
 import "time"
 
 type Answer struct {
-	ID               int
-	UserID           int
-	QuizID           int
-	Correct          bool
-	AnsweredOptionID int
-	CreatedAt        time.Time
+	ID               int       `json:"id"`
+	UserID           int       `json:"user_id"`
+	QuizID           int       `json:"quiz_id"`
+	Correct          bool      `json:"correct"`
+	AnsweredOptionID int       `json:"answered_option_id"`
+	CreatedAt        time.Time `json:"created_at"`
 }

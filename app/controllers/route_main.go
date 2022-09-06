@@ -83,10 +83,14 @@ func createQuiz(w http.ResponseWriter, r *http.Request) {
 	}
 	quiz.CreatedAt = time.Now()
 
-	err := quiz.CreateQuiz()
+	id, err := quiz.CreateQuiz()
 	if err != nil {
 		log.Fatalln(err)
 	}
+	quiz.ID = int(id)
+	correct_option_id, _ := quiz.CreateOptions()
+	quiz.CorrectID = int(correct_option_id)
+	quiz.UpdateQuiz()
 	res, _ := json.Marshal(quiz)
 	w.Write(res)
 }
@@ -106,7 +110,11 @@ func updateQuiz(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal(body, &quiz); err != nil {
 		fmt.Println(err)
 	}
-	err = quiz.UpdateQuiz(quiz_id)
+	err = quiz.UpdateQuiz()
+	err = quiz.UpdateOptions()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	res, _ := json.Marshal(quiz)
 	w.Write(res)

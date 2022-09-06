@@ -19,6 +19,6 @@
 
 # Go workspace file
 go.work
-*.sql
+*.db
 *.log
 .env

@@ -14,8 +14,8 @@ var Db *sql.DB
 var err error
 
 const (
-	tableNameUser = "users"
-	tableNameQuiz = "quizzes"
+	tableNameUser   = "users"
+	tableNameQuiz   = "quizzes"
 	tableNameOption = "options"
 	tableNameAnswer = "answers"
 )

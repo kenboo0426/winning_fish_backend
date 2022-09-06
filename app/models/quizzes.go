@@ -7,12 +7,13 @@ import (
 )
 
 type Quiz struct {
-	ID          int       `jsonapi:"id"`
-	Image       string    `jsonapi:"image"`
-	CorrectID   int       `jsonapi:"correct_id"`
-	CorrectRate float32   `jsonapi:"correct_rate"`
-	Level       int       `jsonapi:"level"`
-	CreatedAt   time.Time `jsonapi:"created_at"`
+	ID          int       `json:"id"`
+	Image       string    `json:"image"`
+	CorrectID   int       `json:"correct_id"`
+	CorrectRate *float32  `json:"correct_rate"`
+	Level       string    `json:"level"`
+	CreatedAt   time.Time `json:"created_at"`
+	Options     []Option  `json:"options"`
 }
 
 func GetQuizzes() (quizzes []Quiz, err error) {
@@ -31,6 +32,7 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 			&quiz.Level,
 			&quiz.CreatedAt,
 		)
+		quiz.Options, _ = quiz.GetOptionsByQuiz()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -51,31 +53,37 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 		&quiz.Level,
 		&quiz.CreatedAt,
 	)
-
-	return quiz, err
-}
-
-func (q *Quiz) CreateQuiz() (err error) {
-	createQuiz := `insert into quizzes (
-		image,
-		correct_id,
-		correct_rate,
-		level,
-		created_at
-	) values(?, ?, ?, ?, ?)`
-
-	_, err = Db.Exec(createQuiz, q.Image, q.CorrectID, q.CorrectRate, q.Level, time.Now())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	quiz.Options, err = quiz.GetOptionsByQuiz()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	return err
+	return quiz, err
 }
 
-func (q *Quiz) UpdateQuiz(id int) (err error) {
+func (q *Quiz) CreateQuiz() (id int64, err error) {
+	createQuiz := `insert into quizzes (
+		image,
+		correct_id,
+		level,
+		created_at
+	) values(?, ?, ?, ?)`
+
+	result, err := Db.Exec(createQuiz, q.Image, q.CorrectRate, q.Level, time.Now())
+	id, _ = result.LastInsertId()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return id, err
+}
+
+func (q *Quiz) UpdateQuiz() (err error) {
 	updateQuiz, err := Db.Prepare(`update quizzes set image = ?,
 	                                                  correct_id = ?,
-	                                                  correct_rate = ?, 
 																										level = ?, 
 																										created_at = ? 
 																										where id = ?`)
@@ -83,7 +91,7 @@ func (q *Quiz) UpdateQuiz(id int) (err error) {
 		log.Fatalln(err)
 	}
 
-	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.CorrectRate, q.Level, q.CreatedAt, id)
+	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.Level, q.CreatedAt, q.ID)
 
 	return err
 }
