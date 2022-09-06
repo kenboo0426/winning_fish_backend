@@ -2,14 +2,12 @@ package models
 
 import (
 	"log"
-	"time"
 )
 
 type Option struct {
-	ID        int
-	Name      string
-	QuizID    int
-	CreatedAt time.Time
+	ID     int
+	Name   string
+	QuizID int
 }
 
 func (q *Quiz) GetOptionsByQuiz() (options []Option, err error) {
@@ -29,4 +27,19 @@ func (q *Quiz) GetOptionsByQuiz() (options []Option, err error) {
 	rows.Close()
 
 	return options, err
+}
+
+func (q *Quiz) CreateOptions() (correct_option_id int64, err error) {
+	cmd := `insert into options (
+		name,
+		quiz_id
+		) values(?, ?)`
+	for index, option := range q.Options {
+		result, _ := Db.Exec(cmd, option.Name, q.ID)
+		if index == 0 {
+			correct_option_id, err = result.LastInsertId()
+		}
+	}
+
+	return correct_option_id, err
 }

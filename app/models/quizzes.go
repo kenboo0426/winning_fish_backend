@@ -57,7 +57,7 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 	return quiz, err
 }
 
-func (q *Quiz) CreateQuiz() (err error) {
+func (q *Quiz) CreateQuiz() (id int64, err error) {
 	createQuiz := `insert into quizzes (
 		image,
 		correct_id,
@@ -65,15 +65,16 @@ func (q *Quiz) CreateQuiz() (err error) {
 		created_at
 	) values(?, ?, ?, ?)`
 
-	_, err = Db.Exec(createQuiz, q.Image, q.CorrectRate, q.Level, time.Now())
+	result, err := Db.Exec(createQuiz, q.Image, q.CorrectRate, q.Level, time.Now())
+	id, _ = result.LastInsertId()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	return err
+	return id, err
 }
 
-func (q *Quiz) UpdateQuiz(id int) (err error) {
+func (q *Quiz) UpdateQuiz() (err error) {
 	updateQuiz, err := Db.Prepare(`update quizzes set image = ?,
 	                                                  correct_id = ?,
 																										level = ?, 
@@ -83,7 +84,7 @@ func (q *Quiz) UpdateQuiz(id int) (err error) {
 		log.Fatalln(err)
 	}
 
-	_, err = updateQuiz.Exec(q.Image, q.CorrectRate, q.Level, q.CreatedAt, id)
+	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.Level, q.CreatedAt, q.ID)
 
 	return err
 }
