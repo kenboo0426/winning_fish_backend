@@ -10,9 +10,10 @@ type Quiz struct {
 	ID          int       `jsonapi:"id"`
 	Image       string    `jsonapi:"image"`
 	CorrectID   int       `jsonapi:"correct_id"`
-	CorrectRate float32   `jsonapi:"correct_rate"`
+	CorrectRate *float32  `jsonapi:"correct_rate"`
 	Level       int       `jsonapi:"level"`
 	CreatedAt   time.Time `jsonapi:"created_at"`
+	Options     []Option  `jsonapi:"options"`
 }
 
 func GetQuizzes() (quizzes []Quiz, err error) {
@@ -31,6 +32,7 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 			&quiz.Level,
 			&quiz.CreatedAt,
 		)
+		quiz.Options, _ = quiz.GetOptionsByQuiz()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -61,7 +63,7 @@ func (q *Quiz) CreateQuiz() (err error) {
 		correct_id,
 		level,
 		created_at
-	) values(?, ?, ?, ?, ?)`
+	) values(?, ?, ?, ?)`
 
 	_, err = Db.Exec(createQuiz, q.Image, q.CorrectRate, q.Level, time.Now())
 	if err != nil {
