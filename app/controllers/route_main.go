@@ -126,6 +126,7 @@ func deleteQuiz(w http.ResponseWriter, r *http.Request) {
 
 	quiz_id, _ := strconv.Atoi(id)
 	quiz, err := models.DeleteQuiz(quiz_id)
+	err = models.DeleteOptions(quiz_id)
 
 	if err != nil {
 		fmt.Println(err)
