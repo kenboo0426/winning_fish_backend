@@ -55,6 +55,7 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 		log.Fatalln(err)
 	}
 	quiz.Options, err = quiz.GetOptionsByQuiz()
+	quiz.QuizImages, err = quiz.GetQuizImagesByQuiz()
 	if err != nil {
 		log.Fatalln(err)
 	}

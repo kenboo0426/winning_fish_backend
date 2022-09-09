@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type QuizImage struct {
 	ID         int       `json:"id"`
@@ -24,4 +27,18 @@ func (q *Quiz) CreateQuizImages() (err error) {
 	}
 
 	return err
+}
+
+func (q *Quiz) GetQuizImagesByQuiz() (images []QuizImage, err error) {
+	cmd := `select id, name, quiz_id, progress_id from quiz_images where quiz_id = ? order by id desc`
+	rows, err := Db.Query(cmd, q.ID)
+	for rows.Next() {
+		i := &QuizImage{}
+		if err := rows.Scan(&i.ID, &i.Name, &i.QuizID, &i.ProgressID); err != nil {
+			log.Fatalln(err)
+		}
+		images = append(images, *i)
+	}
+
+	return images, err
 }
