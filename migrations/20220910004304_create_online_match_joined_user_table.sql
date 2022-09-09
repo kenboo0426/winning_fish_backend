@@ -5,7 +5,9 @@ create table online_match_joined_users (
   rank integer,
   remained_time float,
   miss_answered_count integer,
-  score integer
+  score integer,
+  created_at datetime,
+  updated_at datetime
 );
 
 -- +goose Down
