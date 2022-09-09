@@ -52,3 +52,10 @@ func (q *Quiz) UpdateOptions() (err error) {
 
 	return err
 }
+
+func DeleteOptions(quiz_id int) (err error) {
+	cmd := `delete from options where quiz_id = ?`
+	_, err = Db.Exec(cmd, quiz_id)
+
+	return err
+}

@@ -3,7 +3,9 @@
 ## 環境変数
 
 ```
-FRONTEND_URL
+FRONTEND_URL=localhost:1234
+GOOSE_DRIVER=sqlite3
+GOOSE_DBSTRING=./webapp.db
 ```
 
 ```
@@ -11,7 +13,7 @@ FRONTEND_URL
 GOOSE_DRIVER=sqlite3 GOOSE_DBSTRING=./webapp.db goose up
 
 # migration version down
-GOOSE_DRIVER=sqlite3 GOOSE_DBSTRING=./webapp.Ddb goose down
+GOOSE_DRIVER=sqlite3 GOOSE_DBSTRING=./webapp.db goose down
 ```
 
 

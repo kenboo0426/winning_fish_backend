@@ -88,7 +88,12 @@ func createQuiz(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 	quiz.ID = int(id)
+	
 	correct_option_id, _ := quiz.CreateOptions()
+	if err := quiz.CreateQuizImages(); err != nil {
+		log.Fatalln(err)
+	}
+
 	quiz.CorrectID = int(correct_option_id)
 	quiz.UpdateQuiz()
 	res, _ := json.Marshal(quiz)
@@ -126,6 +131,7 @@ func deleteQuiz(w http.ResponseWriter, r *http.Request) {
 
 	quiz_id, _ := strconv.Atoi(id)
 	quiz, err := models.DeleteQuiz(quiz_id)
+	err = models.DeleteOptions(quiz_id)
 
 	if err != nil {
 		fmt.Println(err)
