@@ -7,13 +7,13 @@ import (
 )
 
 type Quiz struct {
-	ID          int       `json:"id"`
-	Image       string    `json:"image"`
-	CorrectID   int       `json:"correct_id"`
-	CorrectRate *float32  `json:"correct_rate"`
-	Level       string    `json:"level"`
-	CreatedAt   time.Time `json:"created_at"`
-	Options     []Option  `json:"options"`
+	ID          int         `json:"id"`
+	CorrectID   int         `json:"correct_id"`
+	CorrectRate *float32    `json:"correct_rate"`
+	Level       string      `json:"level"`
+	CreatedAt   time.Time   `json:"created_at"`
+	Options     []Option    `json:"options"`
+	QuizImages  []QuizImage `json:"quiz_images"`
 }
 
 func GetQuizzes() (quizzes []Quiz, err error) {
@@ -26,7 +26,6 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 		quiz := &Quiz{}
 		err = rows.Scan(
 			&quiz.ID,
-			&quiz.Image,
 			&quiz.CorrectID,
 			&quiz.CorrectRate,
 			&quiz.Level,
@@ -47,7 +46,6 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 	quiz = Quiz{}
 	err = Db.QueryRow(fetchquiz, id).Scan(
 		&quiz.ID,
-		&quiz.Image,
 		&quiz.CorrectID,
 		&quiz.CorrectRate,
 		&quiz.Level,
@@ -66,13 +64,11 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 
 func (q *Quiz) CreateQuiz() (id int64, err error) {
 	createQuiz := `insert into quizzes (
-		image,
-		correct_id,
 		level,
 		created_at
-	) values(?, ?, ?, ?)`
+	) values(?, ?)`
 
-	result, err := Db.Exec(createQuiz, q.Image, q.CorrectRate, q.Level, time.Now())
+	result, err := Db.Exec(createQuiz, q.Level, time.Now())
 	id, _ = result.LastInsertId()
 	if err != nil {
 		log.Fatalln(err)
@@ -82,8 +78,7 @@ func (q *Quiz) CreateQuiz() (id int64, err error) {
 }
 
 func (q *Quiz) UpdateQuiz() (err error) {
-	updateQuiz, err := Db.Prepare(`update quizzes set image = ?,
-	                                                  correct_id = ?,
+	updateQuiz, err := Db.Prepare(`update quizzes set correct_id = ?,
 																										level = ?, 
 																										created_at = ? 
 																										where id = ?`)
@@ -91,7 +86,7 @@ func (q *Quiz) UpdateQuiz() (err error) {
 		log.Fatalln(err)
 	}
 
-	_, err = updateQuiz.Exec(q.Image, q.CorrectID, q.Level, q.CreatedAt, q.ID)
+	_, err = updateQuiz.Exec(q.CorrectID, q.Level, q.CreatedAt, q.ID)
 
 	return err
 }
