@@ -14,40 +14,34 @@ type User struct {
 	UUID      string    `json:"uuid"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	Rating    float32   `json:"rating"`
+	Rating    *float32  `json:"rating"`
 	Role      int       `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (u *User) CreateUSer() (err error) {
+func (u *User) CreateUser() (err error) {
 	createUser := `insert into users (
-		uuid.
+		uuid,
 		name,
 		email,
-		password,
-		rating,
 		role,
 		created_at
-	) values(?, ?, ?, ? ,?, ?, ?)`
+	) values(?, ?, ? , ?, ?)`
 
-	_, err = Db.Exec(createUser, CreateUUID(), u.Name, u.Email, Encrypt(u.Password), u.Rating, u.Role, time.Now())
-	if err != nil {
-		log.Fatalln(err)
-	}
+	_, err = Db.Exec(createUser, u.UUID, u.Name, u.Email, 0, time.Now())
+
 
 	return err
 }
 
-func GetUser(id int) (user User, err error) {
+func GetUserByIDOrUUID(id int, uuid string) (user User, err error) {
 	user = User{}
-	getUser := `select * from users where id = ?`
-	err = Db.QueryRow(getUser, id).Scan(
+	getUser := `select * from users where id = ? or uuid = ?`
+	err = Db.QueryRow(getUser, id, uuid).Scan(
 		&user.ID,
 		&user.UUID,
 		&user.Name,
 		&user.Email,
-		&user.Password,
 		&user.Rating,
 		&user.Role,
 		&user.CreatedAt,

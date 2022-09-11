@@ -6,6 +6,8 @@ import (
 )
 
 func StartMainServer() error {
+	http.HandleFunc("/user", HandleUserRequest)
+	http.HandleFunc("/user/", HandleUserUpdateRequest)
 	http.HandleFunc("/quizzes", indexQuiz)
 	http.HandleFunc("/quiz", HandleQuizRequst)
 	// ↑↓の順番注意
