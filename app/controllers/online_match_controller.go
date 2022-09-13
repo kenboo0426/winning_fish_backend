@@ -1,11 +1,15 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sort"
+	"strconv"
+	"strings"
 	"winning_fish_backend/app/models"
 
 	"github.com/gorilla/websocket"
@@ -63,7 +67,6 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	log.Println("ok client connectiong")
 
 	var response models.WsJsonResponse
-	// response.Message = `<li>Connected to server</li>`
 
 	conn := models.WebSocketConnection{Conn: ws}
 	clients[conn] = ""
@@ -115,8 +118,26 @@ func ListenToWsChannel() {
 		e := <-wsChan
 
 		switch e.Action {
+		case "fetch_joined_user":
+			user_ids := getUserList()
+			response.Action = "list_users"
+			response.JoinedOnlineMatchUserIDs = user_ids
 		case "join_online_match":
-			clients[e.Conn] = e.UserID
+			var userID string
+			if e.UserID == "" {
+				// var user models.User
+				// user.UUID = models.CreateUUID().String()
+				// user.Name = "guests"
+				// user.Role = 2
+				// user.CreateUser()
+				// userID = string(user.ID)
+			} else {
+				userID = string(e.UserID)
+			}
+
+			if !include(clients, userID) {
+				clients[e.Conn] = userID
+			}
 			user_ids := getUserList()
 			response.Action = "list_users"
 			response.JoinedOnlineMatchUserIDs = user_ids
@@ -144,40 +165,20 @@ func getUserList() []string {
 	return clientList
 }
 
-// net/webscokets
-// func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-// 	fmt.Println("sss")
-// 	websocket.Handler(func(ws *websocket.Conn) {
-// 		defer ws.Close()
-
-// 		err := websocket.Message.Send(ws, "Server: Hello!")
-// 		if err != nil {
-// 			log.Fatalln(err)
-// 		}
-
-// 		for {
-// 			msg := ""
-// 			err = websocket.Message.Receive(ws, &msg)
-// 			if err != nil {
-// 				log.Fatalln(err)
-// 			}
-
-// 			err := websocket.Message.Send(ws, fmt.Sprintf("server: \"%s\" received", msg))
-
-// 			if err != nil {
-// 				log.Fatalln(err)
-// 			}
-// 		}
-// 	}).ServeHTTP(w, r)
-// 	// return nil
-// }
-
 func indexOnlineMatch(w http.ResponseWriter, r *http.Request) {
 
 }
 
 func createOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	var onlineMatch models.OnlineMatch
+	defer r.Body.Close()
+	err := onlineMatch.CreateOnlineMatch()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	res, _ := json.Marshal(onlineMatch)
+	w.Write(res)
 }
 
 func showOnlineMatch(w http.ResponseWriter, r *http.Request) {
@@ -189,5 +190,44 @@ func updateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	sub := strings.TrimPrefix(r.URL.Path, "/quiz")
+	_, id := filepath.Split(sub)
 
+	online_match_id, _ := strconv.Atoi(id)
+	online_match, err := models.GetOnlineMatch(online_match_id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	online_match.Status = "processing"
+	err = online_match.UpdateOnlineMatch()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	res, _ := json.Marshal(online_match)
+	w.Write(res)
+}
+
+func uniq(target []string) (result []string) {
+	m := map[string]bool{}
+
+	for _, v := range target {
+		if !m[v] {
+			m[v] = true
+			result = append(result, v)
+		}
+	}
+
+	return result
+}
+
+func include(array map[models.WebSocketConnection]string, target string) bool {
+	for _, item := range array {
+		if item == target {
+			return true
+		}
+	}
+
+	return false
 }
