@@ -5,9 +5,9 @@ import (
 )
 
 type WsJsonResponse struct {
-	Action                   string `json:"action"`
-	Message                  string `json:"message"`
-	JoinedOnlineMatchUserIDs []string  `json:"joined_onine_match_user_ids"`
+	Action                   string   `json:"action"`
+	Message                  string   `json:"message"`
+	JoinedOnlineMatchUserIDs []string `json:"joined_onine_match_user_ids"`
 }
 
 type WebSocketConnection struct {
