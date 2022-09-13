@@ -23,7 +23,7 @@ func HandleOnlineMatchRequest(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodPost:
-		createOnlineMatch(w, r)
+		joinOrCreateOnlineMatch(w, r)
 	case http.MethodOptions:
 		// handle preflight here
 	default:
@@ -90,6 +90,7 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 
 	for {
 		err := conn.ReadJSON(&payload)
+		fmt.Println(payload, "payload")
 
 		if err != nil {
 			log.Println(err)
@@ -169,10 +170,19 @@ func indexOnlineMatch(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func createOnlineMatch(w http.ResponseWriter, r *http.Request) {
-	var onlineMatch models.OnlineMatch
+func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	user_id := r.FormValue("user_id")
+	onlineMatch, err := models.GetJoinableOnlineMatch()
+	var online_match_joined_user models.OnlineMatchJoinedUser
+	if err == nil {
+		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, string(onlineMatch.ID))
+	} else {
+		err = onlineMatch.CreateOnlineMatch()
+		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, string(onlineMatch.ID))
+	}
+	onlineMatch.OnlineMatchJoinedUsers, err = onlineMatch.GetJoinedUsersByOnlineMatch()
+	
 	defer r.Body.Close()
-	err := onlineMatch.CreateOnlineMatch()
 	if err != nil {
 		log.Fatalln(err)
 	}
