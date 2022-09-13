@@ -15,7 +15,7 @@ type User struct {
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Rating    *float32  `json:"rating"`
-	Role      int       `json:"role"`
+	Role      int       `json:"role"` // 0: general 1: admin 2: guests
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -28,8 +28,9 @@ func (u *User) CreateUser() (err error) {
 		created_at
 	) values(?, ?, ? , ?, ?)`
 
-	_, err = Db.Exec(createUser, u.UUID, u.Name, u.Email, 0, time.Now())
-
+	result, err := Db.Exec(createUser, u.UUID, u.Name, u.Email, u.Role, time.Now())
+	id, _ := result.LastInsertId()
+	u.ID = int(id)
 
 	return err
 }
