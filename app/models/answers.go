@@ -8,5 +8,6 @@ type Answer struct {
 	QuizID           int       `json:"quiz_id"`
 	Correct          bool      `json:"correct"`
 	AnsweredOptionID int       `json:"answered_option_id"`
+	OnlineMatchID    int       `json:"online_match_id"`
 	CreatedAt        time.Time `json:"created_at"`
 }

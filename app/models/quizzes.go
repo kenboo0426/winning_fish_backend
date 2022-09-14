@@ -41,6 +41,37 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 	return quizzes, err
 }
 
+func GetQuizzesByRandomAndLimitFive() (quizzes []Quiz, err error) {
+	cmd := `select * from quizzes order by random() limit 5`
+	rows, err := Db.Query(cmd)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	
+	for rows.Next() {
+		quiz := &Quiz{}
+		err = rows.Scan(
+			&quiz.ID,
+			&quiz.CorrectID,
+			&quiz.CorrectRate,
+			&quiz.Level,
+			&quiz.CreatedAt,
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		quizzes = append(quizzes, *quiz)
+	}
+
+	for len(quizzes) < 5 {
+		quizzes = append(quizzes, quizzes...)
+	}
+	quizzes = quizzes[:5]
+
+	rows.Close()
+	return quizzes, err
+}
+
 func GetQuiz(id int) (quiz Quiz, err error) {
 	fetchquiz := `select * from quizzes where id = ?`
 	quiz = Quiz{}
@@ -55,6 +86,7 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 		log.Fatalln(err)
 	}
 	quiz.Options, err = quiz.GetOptionsByQuiz()
+	quiz.QuizImages, err = quiz.GetQuizImagesByQuiz()
 	if err != nil {
 		log.Fatalln(err)
 	}

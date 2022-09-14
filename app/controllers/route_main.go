@@ -88,7 +88,7 @@ func createQuiz(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 	quiz.ID = int(id)
-	
+
 	correct_option_id, _ := quiz.CreateOptions()
 	if err := quiz.CreateQuizImages(); err != nil {
 		log.Fatalln(err)
