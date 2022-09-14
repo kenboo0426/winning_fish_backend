@@ -17,19 +17,37 @@ type OnlineMatchJoinedUser struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
-func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlineMatchID string) (err error) {
+func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlineMatchID int) (err error) {
+	_, err = GetJoinedUsersByOnlineMatchAndUserID(onlineMatchID, userID)
+	if err != nil {
+		return
+	}
+	
 	cmd := `insert into online_match_joined_users (
 		user_id,
 		online_match_id,
 		created_at,
-		updated_at,
-	) values (?,?,?,?)`
+		updated_at
+	) values (?, ?, ?, ?)`
 
 	result, err := Db.Exec(cmd, userID, onlineMatchID, time.Now(), time.Now())
 	id, _ := result.LastInsertId()
 	j.ID = int(id)
 
 	return err
+}
+
+func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string) (online_match_joined_user OnlineMatchJoinedUser, err error) {
+	cmd := `select id, user_id, online_match_id from online_match_joined_users where online_match_id = ? and user_id`
+	online_match_joined_user = OnlineMatchJoinedUser{}
+	err = Db.QueryRow(cmd, online_match_id, user_id).Scan(
+		&online_match_joined_user.ID,
+		&online_match_joined_user.UserID,
+		&online_match_joined_user.OnlineMatchID,
+		&online_match_joined_user.CreatedAt,
+	)
+
+	return online_match_joined_user, err
 }
 
 func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users []OnlineMatchJoinedUser, err error) {

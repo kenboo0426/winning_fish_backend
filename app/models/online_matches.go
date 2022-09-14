@@ -6,15 +6,15 @@ import (
 )
 
 type OnlineMatch struct {
-	ID                 int       `json:"id"`
-	PersonNumber       int       `json:"person_number"`
-	ParticipantsNumber int       `json:"participants_number"`
-	StartedAt          time.Time `json:"started_at"`
-	FinishedAt         time.Time `json:"finished_at"`
-	Status             string    `json:"status"` // opening, processing, finishied
+	ID                 int        `json:"id"`
+	PersonNumber       int        `json:"person_number"`
+	ParticipantsNumber int        `json:"participants_number"`
+	StartedAt          *time.Time `json:"started_at"`
+	FinishedAt         *time.Time `json:"finished_at"`
+	Status             string     `json:"status"` // opening, processing, finishied
 	// RemainingWaitTime  float32   `json:"remaining_wait_time"`
-	CreatedAt              time.Time               `json:"created_at"`
-	UpdatedAt              time.Time               `json:"updated_at"`
+	CreatedAt              *time.Time              `json:"created_at"`
+	UpdatedAt              *time.Time              `json:"updated_at"`
 	OnlineMatchJoinedUsers []OnlineMatchJoinedUser `json:"online_match_joined_users"`
 }
 
@@ -38,7 +38,7 @@ func GetOnlineMatch(id int) (online_match OnlineMatch, err error) {
 }
 
 func GetJoinableOnlineMatch() (online_match OnlineMatch, err error) {
-	cmd := `select *,count(online_matches.id) as m_count from online_matches inner join online_match_joined_users on online_match_joined_users.online_match_id = online_matches.id where online_matches.status = ? group by online_matches.id having m_count < ?`
+	cmd := `select online_matches.id, online_matches.person_number, online_matches.participants_number, online_matches.started_at, online_matches.finished_at, online_matches.status, online_matches.created_at, online_matches.updated_at from online_matches inner join online_match_joined_users on online_match_joined_users.online_match_id = online_matches.id where online_matches.status = ? group by online_matches.id having count(online_matches.id) < ?`
 
 	err = Db.QueryRow(cmd, "opening", 4).Scan(
 		&online_match.ID,
