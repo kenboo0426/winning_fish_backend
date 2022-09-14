@@ -34,3 +34,22 @@ func (o *OnlineMatch) RegisterQuiz() {
 	}
 
 }
+
+func (o *OnlineMatch) GetAskedQuizByOnlineMatch() (online_match_asked_quizzes []OnlineMatchAskedQuiz, err error) {
+	cmd := `select id, quiz_id, online_match_id from online_match_asked_quizzes where online_match_id = ?`
+	rows, err := Db.Query(cmd, o.ID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for rows.Next() {
+		var askedQuiz OnlineMatchAskedQuiz
+		err = rows.Scan(&askedQuiz.ID, &askedQuiz.QuizID, &askedQuiz.OnlineMatchID)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		online_match_asked_quizzes = append(online_match_asked_quizzes, askedQuiz)
+	}
+	rows.Close()
+
+	return online_match_asked_quizzes, err
+}

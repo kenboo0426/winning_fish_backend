@@ -82,6 +82,7 @@ func showOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	onlineMatch.OnlineMatchJoinedUsers, err = onlineMatch.GetJoinedUsersByOnlineMatch()
+	onlineMatch.OnlineMatchAskedQuizzes, err = onlineMatch.GetAskedQuizByOnlineMatch()
 	if err != nil {
 		log.Fatalln(err)
 	}
