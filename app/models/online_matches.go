@@ -38,7 +38,7 @@ func GetOnlineMatch(id int) (online_match OnlineMatch, err error) {
 }
 
 func GetJoinableOnlineMatch() (online_match OnlineMatch, err error) {
-	cmd := `select online_matches.id, online_matches.person_number, online_matches.participants_number, online_matches.started_at, online_matches.finished_at, online_matches.status, online_matches.created_at, online_matches.updated_at from online_matches inner join online_match_joined_users on online_match_joined_users.online_match_id = online_matches.id where online_matches.status = ? group by online_matches.id having count(online_matches.id) < ?`
+	cmd := `select online_matches.id, online_matches.person_number, online_matches.participants_number, online_matches.started_at, online_matches.finished_at, online_matches.status, online_matches.created_at, online_matches.updated_at from online_matches left join online_match_joined_users on online_match_joined_users.online_match_id = online_matches.id where online_matches.status = ? group by online_matches.id having count(online_matches.id) < ?`
 
 	err = Db.QueryRow(cmd, "opening", 4).Scan(
 		&online_match.ID,
@@ -55,7 +55,7 @@ func GetJoinableOnlineMatch() (online_match OnlineMatch, err error) {
 }
 
 func (o *OnlineMatch) CreateOnlineMatch() (err error) {
-	cmd := `insert into online_match (
+	cmd := `insert into online_matches (
 		person_number,
 		participants_number,
 		status,
@@ -63,7 +63,7 @@ func (o *OnlineMatch) CreateOnlineMatch() (err error) {
 		updated_at
 	) values(?, ?, ?, ?, ?)`
 
-	result, err := Db.Exec(cmd, 0, 4, "opening", time.Now(), time.Now())
+	result, err := Db.Exec(cmd, o.PersonNumber, o.ParticipantsNumber, o.Status, time.Now(), time.Now())
 	id, _ := result.LastInsertId()
 	o.ID = int(id)
 

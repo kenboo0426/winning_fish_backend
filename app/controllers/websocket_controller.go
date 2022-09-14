@@ -51,7 +51,6 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 
 	for {
 		err := conn.ReadJSON(&payload)
-		fmt.Println(payload, "payload")
 
 		if err != nil {
 			log.Println(err)
@@ -111,8 +110,6 @@ func ListenToWsChannel() {
 			response.Action = "list_users"
 			response.Users = user_ids
 		}
-		fmt.Println(e.UserName, "name")
-		fmt.Println(response, "resposne")
 
 		broadcastToAll(response)
 	}

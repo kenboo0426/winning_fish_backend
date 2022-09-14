@@ -19,17 +19,16 @@ type OnlineMatchJoinedUser struct {
 
 func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlineMatchID int) (err error) {
 	_, err = GetJoinedUsersByOnlineMatchAndUserID(onlineMatchID, userID)
-	if err != nil {
+	if err == nil {
 		return
 	}
-	
+
 	cmd := `insert into online_match_joined_users (
 		user_id,
 		online_match_id,
 		created_at,
 		updated_at
 	) values (?, ?, ?, ?)`
-
 	result, err := Db.Exec(cmd, userID, onlineMatchID, time.Now(), time.Now())
 	id, _ := result.LastInsertId()
 	j.ID = int(id)
