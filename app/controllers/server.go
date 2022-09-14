@@ -19,6 +19,7 @@ func StartMainServer() error {
 	http.HandleFunc("/online_match", HandleOnlineMatchRequest)
 	// ↑↓の順番注意
 	http.HandleFunc("/online_match/", HandleOnlineMatchUpdateRequest)
+	http.HandleFunc("/answer", HandleAnswerRequest)
 
 	return http.ListenAndServe(":"+config.Config.Port, nil)
 }
