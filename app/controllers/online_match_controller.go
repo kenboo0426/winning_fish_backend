@@ -191,7 +191,22 @@ func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func showOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	sub := strings.TrimPrefix(r.URL.Path, "/online_match")
+	_, id := filepath.Split(sub)
 
+	online_match_id, _ := strconv.Atoi(id)
+	onlineMatch, err := models.GetOnlineMatch(online_match_id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	onlineMatch.OnlineMatchJoinedUsers, err = onlineMatch.GetJoinedUsersByOnlineMatch()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	res, _ := json.Marshal(onlineMatch)
+	w.Write(res)
 }
 
 func updateOnlineMatch(w http.ResponseWriter, r *http.Request) {

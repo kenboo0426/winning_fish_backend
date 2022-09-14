@@ -19,7 +19,7 @@ type OnlineMatch struct {
 }
 
 func GetOnlineMatch(id int) (online_match OnlineMatch, err error) {
-	cmd := `select * from online_matches where id = ?`
+	cmd := `select id,person_number,participants_number,started_at,finished_at,status,created_at,updated_at from online_matches where id = ?`
 	err = Db.QueryRow(cmd, id).Scan(
 		&online_match.ID,
 		&online_match.PersonNumber,
