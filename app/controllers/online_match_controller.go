@@ -54,6 +54,9 @@ func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, onlineMatch.ID)
 	} else {
+		onlineMatch.PersonNumber = 0
+		onlineMatch.ParticipantsNumber = 4
+		onlineMatch.Status = "opening"
 		err = onlineMatch.CreateOnlineMatch()
 		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, onlineMatch.ID)
 	}
@@ -88,11 +91,14 @@ func showOnlineMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateOnlineMatch(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
-	sub := strings.TrimPrefix(r.URL.Path, "/quiz")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+
+	sub := strings.TrimPrefix(r.URL.Path, "/online_match/start")
 	_, id := filepath.Split(sub)
 
 	online_match_id, _ := strconv.Atoi(id)
@@ -102,6 +108,7 @@ func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	}
 	online_match.Status = "processing"
 	err = online_match.UpdateOnlineMatch()
+	online_match.RegisterQuiz()
 
 	if err != nil {
 		log.Fatalln(err)
