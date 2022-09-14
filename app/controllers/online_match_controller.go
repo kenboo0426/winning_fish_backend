@@ -13,7 +13,6 @@ import (
 	"winning_fish_backend/app/models"
 
 	"github.com/gorilla/websocket"
-	// "golang.org/x/net/websocket"
 )
 
 func HandleOnlineMatchRequest(w http.ResponseWriter, r *http.Request) {
@@ -175,13 +174,13 @@ func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	onlineMatch, err := models.GetJoinableOnlineMatch()
 	var online_match_joined_user models.OnlineMatchJoinedUser
 	if err == nil {
-		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, string(onlineMatch.ID))
+		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, onlineMatch.ID)
 	} else {
 		err = onlineMatch.CreateOnlineMatch()
-		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, string(onlineMatch.ID))
+		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, onlineMatch.ID)
 	}
 	onlineMatch.OnlineMatchJoinedUsers, err = onlineMatch.GetJoinedUsersByOnlineMatch()
-	
+
 	defer r.Body.Close()
 	if err != nil {
 		log.Fatalln(err)
