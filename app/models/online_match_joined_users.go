@@ -15,6 +15,7 @@ type OnlineMatchJoinedUser struct {
 	Score             *int      `json:"score"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
+	User              User      `json:"user"`
 }
 
 func (o *OnlineMatchJoinedUser) CalculateRemainedTimeByOnlineMatchID() (err error) {
@@ -103,7 +104,7 @@ func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string) (
 }
 
 func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users []OnlineMatchJoinedUser, err error) {
-	cmd := `select id, user_id, online_match_id, rank,remained_time, miss_answered_count from online_match_joined_users where online_match_id = ?`
+	cmd := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
 	rows, err := Db.Query(cmd, o.ID)
 	if err != nil {
 		log.Fatalln(err)
@@ -111,7 +112,7 @@ func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users [
 
 	for rows.Next() {
 		var joinedUser OnlineMatchJoinedUser
-		err = rows.Scan(&joinedUser.ID, &joinedUser.UserID, &joinedUser.OnlineMatchID, &joinedUser.Rank, &joinedUser.RemainedTime, &joinedUser.MissAnsweredCount)
+		err = rows.Scan(&joinedUser.ID, &joinedUser.UserID, &joinedUser.OnlineMatchID, &joinedUser.Rank, &joinedUser.RemainedTime, &joinedUser.MissAnsweredCount, &joinedUser.User.Name)
 		if err != nil {
 			log.Fatalln(err)
 		}
