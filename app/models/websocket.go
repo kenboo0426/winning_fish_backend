@@ -5,8 +5,9 @@ import (
 )
 
 type WsUser struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	RemainedTime float32 `json:"remained_time"`
 }
 
 type WsJsonResponse struct {
@@ -21,8 +22,9 @@ type WebSocketConnection struct {
 }
 
 type WsPayload struct {
-	Action   string              `json:"action"`
-	UserID   string              `json:"user_id"`
-	UserName string              `json:"user_name"`
-	Conn     WebSocketConnection `json:"-"`
+	Action       string              `json:"action"`
+	UserID       string              `json:"user_id"`
+	UserName     string              `json:"user_name"`
+	RemainedTime float32             `json:"remained_time"`
+	Conn         WebSocketConnection `json:"-"`
 }

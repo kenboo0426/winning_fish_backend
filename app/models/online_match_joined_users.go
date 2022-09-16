@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log"
 	"time"
 )
@@ -22,7 +21,6 @@ func (o *OnlineMatchJoinedUser) CalculateRemainedTimeByOnlineMatchID() (err erro
 	isRemainedTime, _ := OnlineMatchJoinedUserHasRemainedTime(o.OnlineMatchID, o.UserID)
 
 	if isRemainedTime {
-		fmt.Println(isRemainedTime, "true")
 		return err
 	}
 
@@ -30,7 +28,6 @@ func (o *OnlineMatchJoinedUser) CalculateRemainedTimeByOnlineMatchID() (err erro
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(total_remained_time, "total_remained_time")
 	o.RemainedTime = &total_remained_time
 	err = o.UpdateOnlineMatchJoinedUser()
 	if err != nil {
@@ -83,8 +80,6 @@ func OnlineMatchJoinedUserHasRemainedTime(online_match_id int, user_id int) (isR
 		&online_match_joined_user.OnlineMatchID,
 		&online_match_joined_user.CreatedAt,
 	)
-
-	fmt.Println(online_match_joined_user, "online_match_joined_user")
 
 	if err != nil {
 		return true, err
