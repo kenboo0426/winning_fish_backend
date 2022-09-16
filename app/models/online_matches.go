@@ -13,9 +13,10 @@ type OnlineMatch struct {
 	FinishedAt         *time.Time `json:"finished_at"`
 	Status             string     `json:"status"` // opening, processing, finishied
 	// RemainingWaitTime  float32   `json:"remaining_wait_time"`
-	CreatedAt              *time.Time              `json:"created_at"`
-	UpdatedAt              *time.Time              `json:"updated_at"`
-	OnlineMatchJoinedUsers []OnlineMatchJoinedUser `json:"online_match_joined_users"`
+	CreatedAt               *time.Time              `json:"created_at"`
+	UpdatedAt               *time.Time              `json:"updated_at"`
+	OnlineMatchJoinedUsers  []OnlineMatchJoinedUser `json:"online_match_joined_users"`
+	OnlineMatchAskedQuizzes []OnlineMatchAskedQuiz  `json:"online_match_asked_quizzes"`
 }
 
 func GetOnlineMatch(id int) (online_match OnlineMatch, err error) {
