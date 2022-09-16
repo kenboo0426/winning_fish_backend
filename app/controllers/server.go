@@ -16,6 +16,7 @@ func StartMainServer() error {
 	http.HandleFunc("/socket", handleWebSocket)
 	go ListenToWsChannel()
 	http.HandleFunc("/online_match/start/", startOnlineMatch)
+	http.HandleFunc("/online_match/calculate/", calculateOnlineMatch)
 	http.HandleFunc("/online_match", HandleOnlineMatchRequest)
 	// ↑↓の順番注意
 	http.HandleFunc("/online_match/", HandleOnlineMatchUpdateRequest)
