@@ -53,7 +53,7 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 		err := conn.ReadJSON(&payload)
 
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 		} else {
 			payload.Conn = *conn
 			wsChan <- payload
@@ -63,6 +63,7 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 
 func broadcastToAll(response models.WsJsonResponse) {
 	for client := range clients {
+		fmt.Println(response, client)
 		err := client.WriteJSON(response)
 		if err != nil {
 			log.Println(err)
@@ -79,6 +80,10 @@ func ListenToWsChannel() {
 		e := <-wsChan
 
 		switch e.Action {
+		case "start_online_match":
+			users := getUserList()
+			response.Users = users
+			response.Action = "start"
 		case "fetch_joined_user":
 			users := getUserList()
 			response.Action = "list_users"

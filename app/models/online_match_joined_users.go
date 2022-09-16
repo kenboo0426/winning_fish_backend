@@ -87,7 +87,6 @@ func OnlineMatchJoinedUserHasRemainedTime(online_match_id int, user_id int) (isR
 	fmt.Println(online_match_joined_user, "online_match_joined_user")
 
 	if err != nil {
-		log.Fatalln(err, "err")
 		return true, err
 	} else {
 		return false, err
