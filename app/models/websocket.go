@@ -8,6 +8,7 @@ type WsUser struct {
 	ID           string  `json:"id"`
 	Name         string  `json:"name"`
 	RemainedTime float32 `json:"remained_time"`
+	Icon         string  `json:"icon"`
 }
 
 type WsJsonResponse struct {
@@ -26,5 +27,6 @@ type WsPayload struct {
 	UserID       string              `json:"user_id"`
 	UserName     string              `json:"user_name"`
 	RemainedTime float32             `json:"remained_time"`
+	UserIcon     string              `json:"user_icon"`
 	Conn         WebSocketConnection `json:"-"`
 }

@@ -99,13 +99,10 @@ func ListenToWsChannel() {
 			response.Users = users
 		case "join_online_match":
 			var userID string
-			if e.UserID == "" {
-			} else {
-				userID = string(e.UserID)
-			}
+			userID = string(e.UserID)
 
 			if !include(clients, userID) {
-				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName}
+				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, Icon: e.UserIcon}
 			}
 			users := getUserList()
 			response.Action = "list_users"
