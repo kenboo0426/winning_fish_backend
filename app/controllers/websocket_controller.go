@@ -63,7 +63,6 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 
 func broadcastToAll(response models.WsJsonResponse) {
 	for client := range clients {
-		fmt.Println(response, client)
 		err := client.WriteJSON(response)
 		if err != nil {
 			log.Println(err)
@@ -92,7 +91,7 @@ func ListenToWsChannel() {
 			var userID string
 			userID = string(e.UserID)
 			if !include(clients, userID) {
-				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, RemainedTime: &e.RemainedTime}
+				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, RemainedTime: &e.RemainedTime, Icon: e.UserIcon}
 			}
 			users := getUserList()
 			response.Action = "finished_online_match"
@@ -121,7 +120,6 @@ func ListenToWsChannel() {
 func getUserList() []models.WsUser {
 	var clientList []models.WsUser
 	for _, client := range clients {
-		fmt.Printf("p :%+v\n", client)
 		if client.ID != "" {
 			clientList = append(clientList, client)
 		}
