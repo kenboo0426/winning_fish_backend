@@ -78,13 +78,14 @@ func (o *OnlineMatch) CreateOnlineMatch() (err error) {
 func (m *OnlineMatch) UpdateOnlineMatch() (err error) {
 	cmd, err := Db.Prepare(`update online_matches set status = ?,
 	                                                  started_at = ?,
-																										updated_at = ? 
+																										updated_at = ?,
+																										finished_at = ?
 																										where id = ?`)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	_, err = cmd.Exec(m.Status, time.Now(), time.Now(), m.ID)
+	_, err = cmd.Exec(m.Status, time.Now(), time.Now(), m.FinishedAt, m.ID)
 
 	return err
 }
