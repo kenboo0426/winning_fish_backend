@@ -92,7 +92,7 @@ func ListenToWsChannel() {
 			var userID string
 			userID = string(e.UserID)
 			if !include(clients, userID) {
-				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, RemainedTime: e.RemainedTime}
+				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, RemainedTime: &e.RemainedTime}
 			}
 			users := getUserList()
 			response.Action = "finished_online_match"

@@ -5,10 +5,10 @@ import (
 )
 
 type WsUser struct {
-	ID           string  `json:"id"`
-	Name         string  `json:"name"`
-	RemainedTime float32 `json:"remained_time"`
-	Icon         string  `json:"icon"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	RemainedTime *float32 `json:"remained_time"`
+	Icon         string   `json:"icon"`
 }
 
 type WsJsonResponse struct {

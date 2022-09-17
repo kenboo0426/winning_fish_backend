@@ -133,7 +133,7 @@ func finishOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	online_match.Status = "finishied"
+	online_match.Status = "finished"
 	finished_at := time.Now()
 	online_match.FinishedAt = &finished_at
 	err = online_match.UpdateOnlineMatch()
