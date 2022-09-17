@@ -16,6 +16,7 @@ type User struct {
 	Email     string    `json:"email"`
 	Rating    *float32  `json:"rating"`
 	Role      int       `json:"role"` // 0: general 1: admin 2: guests
+	Icon      string    `json:"icon"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -25,10 +26,11 @@ func (u *User) CreateUser() (err error) {
 		name,
 		email,
 		role,
+		icon,
 		created_at
-	) values(?, ?, ? , ?, ?)`
+	) values(?, ?, ? , ?, ?, ?)`
 
-	result, err := Db.Exec(createUser, u.UUID, u.Name, u.Email, u.Role, time.Now())
+	result, err := Db.Exec(createUser, u.UUID, u.Name, u.Email, u.Role, u.Icon, time.Now())
 	id, _ := result.LastInsertId()
 	u.ID = int(id)
 
@@ -46,6 +48,7 @@ func GetUserByIDOrUUID(id int, uuid string) (user User, err error) {
 		&user.Rating,
 		&user.Role,
 		&user.CreatedAt,
+		&user.Icon,
 	)
 	return user, err
 }
