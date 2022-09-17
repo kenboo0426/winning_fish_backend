@@ -83,7 +83,7 @@ func ListenToWsChannel() {
 		case "start_online_match":
 			users := getUserList()
 			response.Users = users
-			response.Action = "start"
+			response.Action = "start_online_match"
 		case "fetch_joined_user":
 			users := getUserList()
 			response.Action = "list_users"
