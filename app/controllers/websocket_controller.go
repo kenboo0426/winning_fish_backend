@@ -83,28 +83,26 @@ func ListenToWsChannel() {
 		case "start_online_match":
 			users := getUserList()
 			response.Users = users
-			response.Action = "start"
+			response.Action = "start_online_match"
 		case "fetch_joined_user":
 			users := getUserList()
 			response.Action = "list_users"
 			response.Users = users
-
+		case "finished_online_match":
+			var userID string
+			userID = string(e.UserID)
+			if !include(clients, userID) {
+				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, RemainedTime: &e.RemainedTime}
+			}
+			users := getUserList()
+			response.Action = "finished_online_match"
+			response.Users = users
 		case "join_online_match":
 			var userID string
-			if e.UserID == "" {
-				// var user models.User
-				// user.UUID = models.CreateUUID().String()
-				// user.Name = "guests"
-				// user.Role = 2
-				// user.CreateUser()
-				// userID = string(user.ID)
-			} else {
-				userID = string(e.UserID)
-			}
+			userID = string(e.UserID)
 
 			if !include(clients, userID) {
-
-				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName}
+				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, Icon: e.UserIcon}
 			}
 			users := getUserList()
 			response.Action = "list_users"

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log"
 	"time"
 )
@@ -29,7 +28,6 @@ func CalculateTotalRemainedTime(online_match_id int, user_id int) (total_time fl
 	for rows.Next() {
 		rows.Scan(&total_remained_time)
 	}
-	fmt.Println(total_remained_time, "total")
 
 	return float32(total_remained_time), err
 }

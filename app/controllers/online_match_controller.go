@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 	"winning_fish_backend/app/models"
 )
 
@@ -110,6 +111,37 @@ func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	online_match.Status = "processing"
 	err = online_match.UpdateOnlineMatch()
 	online_match.RegisterQuiz()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	res, _ := json.Marshal(online_match)
+	w.Write(res)
+}
+
+func finishOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+
+	sub := strings.TrimPrefix(r.URL.Path, "/online_match/finish")
+	_, id := filepath.Split(sub)
+
+	online_match_id, _ := strconv.Atoi(id)
+	online_match, err := models.GetOnlineMatch(online_match_id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	online_match.Status = "finished"
+	finished_at := time.Now()
+	online_match.FinishedAt = &finished_at
+	err = online_match.UpdateOnlineMatch()
+	online_match.OnlineMatchJoinedUsers, err = online_match.GetJoinedUsersByOnlineMatch()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	online_match.OnlineMatchAskedQuizzes, err = online_match.GetAskedQuizByOnlineMatch()
 
 	if err != nil {
 		log.Fatalln(err)

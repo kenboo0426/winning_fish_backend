@@ -14,6 +14,12 @@ type OnlineMatchAskedQuiz struct {
 }
 
 func (o *OnlineMatch) RegisterQuiz() {
+	alreadyRegisteredQuiz := o.AlreadyRegiseredQuiz()
+
+	if alreadyRegisteredQuiz {
+		return
+	}
+
 	quizzes, err := GetQuizzesByRandomAndLimitFive()
 	cmd := `insert into online_match_asked_quizzes (
 		quiz_id,
@@ -33,6 +39,18 @@ func (o *OnlineMatch) RegisterQuiz() {
 		log.Fatalln(err)
 	}
 
+}
+
+func (o *OnlineMatch) AlreadyRegiseredQuiz() (alreadyRegisteredQuiz bool) {
+	cmd := `select id from online_match_asked_quizzes where online_match_id = ?`
+	var id int
+	err := Db.QueryRow(cmd, o.ID).Scan(&id)
+
+	if err == nil {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (o *OnlineMatch) GetAskedQuizByOnlineMatch() (online_match_asked_quizzes []OnlineMatchAskedQuiz, err error) {
