@@ -16,7 +16,7 @@ type User struct {
 	Email     string    `json:"email"`
 	Rating    *float32  `json:"rating"`
 	Role      int       `json:"role"` // 0: general 1: admin 2: guests
-	Icon      string    `json:"icon"`
+	Icon      *string   `json:"icon"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -39,14 +39,14 @@ func (u *User) CreateUser() (err error) {
 
 func GetUserByIDOrUUID(id int, uuid string) (user User, err error) {
 	user = User{}
-	getUser := `select * from users where id = ? or uuid = ?`
+	getUser := `select id, uuid, name, email, rating, role, created_at, icon from users where id = ? or uuid = ?`
 	err = Db.QueryRow(getUser, id, uuid).Scan(
 		&user.ID,
 		&user.UUID,
 		&user.Name,
 		&user.Email,
 		&user.Rating,
-		&user.Role,
+		&user.Role, // 0: general, 1: admin, 2: guest
 		&user.CreatedAt,
 		&user.Icon,
 	)
