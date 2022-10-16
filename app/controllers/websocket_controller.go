@@ -96,7 +96,6 @@ func ListenToWsChannel() {
 		case "join_online_match":
 			var userID string
 			userID = string(e.UserID)
-
 			if !include(clients, userID) {
 				clients[e.Conn] = models.WsClient{
 					WsUser: models.WsUser{
