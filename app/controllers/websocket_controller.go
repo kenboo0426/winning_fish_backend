@@ -17,10 +17,10 @@ var upgradeConnection = websocket.Upgrader{
 
 var (
 	wsChan  = make(chan models.WsRequest)
-	clients = make(map[models.WebSocketConnection]models.WsUser)
+	clients = make(map[models.WsConnection]models.WsClient)
 )
 
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+func startWebSocket(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgradeConnection.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -29,8 +29,8 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	var response models.WsResponse
 
-	conn := models.WebSocketConnection{Conn: ws}
-	clients[conn] = models.WsUser{}
+	conn := models.WsConnection{Conn: ws}
+	clients[conn] = models.WsClient{}
 
 	err = ws.WriteJSON(response)
 	if err != nil {
@@ -40,34 +40,23 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	go ListenFowWs(&conn)
 }
 
-func ListenFowWs(conn *models.WebSocketConnection) {
+func ListenFowWs(conn *models.WsConnection) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("Error", fmt.Sprintf("%v", r))
 		}
 	}()
 
-	var payload models.WsRequest
+	var request models.WsRequest
 
 	for {
-		err := conn.ReadJSON(&payload)
+		err := conn.ReadJSON(&request)
 
 		if err != nil {
 			break
 		} else {
-			payload.Conn = *conn
-			wsChan <- payload
-		}
-	}
-}
-
-func broadcastToAll(response models.WsResponse) {
-	for client := range clients {
-		err := client.WriteJSON(response)
-		if err != nil {
-			log.Println(err)
-			_ = client.Close()
-			delete(clients, client)
+			request.Conn = *conn
+			wsChan <- request
 		}
 	}
 }
@@ -80,20 +69,28 @@ func ListenToWsChannel() {
 
 		switch e.Action {
 		case "start_online_match":
-			users := getUserList()
+			users := getUserList(e.OnlineMatchID)
 			response.Users = users
 			response.Action = "start_online_match"
 		case "fetch_joined_user":
-			users := getUserList()
+			users := getUserList(e.OnlineMatchID)
 			response.Action = "list_users"
 			response.Users = users
 		case "finished_online_match":
 			var userID string
 			userID = string(e.UserID)
 			if !include(clients, userID) {
-				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, RemainedTime: &e.RemainedTime, Icon: e.UserIcon}
+				clients[e.Conn] = models.WsClient{
+					WsUser: models.WsUser{
+						ID:           userID,
+						Name:         e.UserName,
+						RemainedTime: &e.RemainedTime,
+						Icon:         e.UserIcon,
+					},
+					OnlineMatchID: e.OnlineMatchID,
+				}
 			}
-			users := getUserList()
+			users := getUserList(e.OnlineMatchID)
 			response.Action = "finished_online_match"
 			response.Users = users
 		case "join_online_match":
@@ -101,27 +98,51 @@ func ListenToWsChannel() {
 			userID = string(e.UserID)
 
 			if !include(clients, userID) {
-				clients[e.Conn] = models.WsUser{ID: userID, Name: e.UserName, Icon: e.UserIcon}
+				clients[e.Conn] = models.WsClient{
+					WsUser: models.WsUser{
+						ID:           userID,
+						Name:         e.UserName,
+						RemainedTime: &e.RemainedTime,
+						Icon:         e.UserIcon,
+					},
+					OnlineMatchID: e.OnlineMatchID,
+				}
 			}
-			users := getUserList()
+			users := getUserList(e.OnlineMatchID)
 			response.Action = "list_users"
 			response.Users = users
 		case "left":
 			delete(clients, e.Conn)
-			user_ids := getUserList()
+			user_ids := getUserList(e.OnlineMatchID)
 			response.Action = "list_users"
 			response.Users = user_ids
 		}
+		response.OnlineMatchID = e.OnlineMatchID
 
 		broadcastToAll(response)
 	}
 }
 
-func getUserList() []models.WsUser {
+func broadcastToAll(response models.WsResponse) {
+	for conn, client := range clients {
+		if client.OnlineMatchID != response.OnlineMatchID {
+			continue
+		}
+
+		err := conn.WriteJSON(response)
+		if err != nil {
+			log.Println(err)
+			_ = conn.Close()
+			delete(clients, conn)
+		}
+	}
+}
+
+func getUserList(online_match_id int) []models.WsUser {
 	var clientList []models.WsUser
 	for _, client := range clients {
-		if client.ID != "" {
-			clientList = append(clientList, client)
+		if client.WsUser.ID != "" && client.OnlineMatchID == online_match_id {
+			clientList = append(clientList, client.WsUser)
 		}
 	}
 
@@ -141,9 +162,9 @@ func uniq(target []string) (result []string) {
 	return result
 }
 
-func include(array map[models.WebSocketConnection]models.WsUser, target string) bool {
+func include(array map[models.WsConnection]models.WsClient, target string) bool {
 	for _, item := range array {
-		if item.ID == target {
+		if item.WsUser.ID == target {
 			return true
 		}
 	}
