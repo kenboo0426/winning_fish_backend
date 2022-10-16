@@ -104,7 +104,7 @@ func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string) (
 }
 
 func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users []OnlineMatchJoinedUser, err error) {
-	cmd := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
+	cmd := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name, t2.icon from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
 	rows, err := Db.Query(cmd, o.ID)
 	if err != nil {
 		log.Fatalln(err)
@@ -112,7 +112,7 @@ func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users [
 
 	for rows.Next() {
 		var joinedUser OnlineMatchJoinedUser
-		err = rows.Scan(&joinedUser.ID, &joinedUser.UserID, &joinedUser.OnlineMatchID, &joinedUser.Rank, &joinedUser.RemainedTime, &joinedUser.MissAnsweredCount, &joinedUser.User.Name)
+		err = rows.Scan(&joinedUser.ID, &joinedUser.UserID, &joinedUser.OnlineMatchID, &joinedUser.Rank, &joinedUser.RemainedTime, &joinedUser.MissAnsweredCount, &joinedUser.User.Name, &joinedUser.User.Icon)
 		if err != nil {
 			log.Fatalln(err)
 		}
