@@ -11,7 +11,7 @@ type WsUser struct {
 	Icon         string   `json:"icon"`
 }
 
-type WsJsonResponse struct {
+type WsResponse struct {
 	Action                   string      `json:"action"`
 	JoinedOnlineMatchUserIDs []string    `json:"joined_onine_match_user_ids"`
 	Users                    []WsUser    `json:"users"`
@@ -22,7 +22,7 @@ type WebSocketConnection struct {
 	*websocket.Conn
 }
 
-type WsPayload struct {
+type WsRequest struct {
 	Action       string              `json:"action"`
 	UserID       string              `json:"user_id"`
 	UserName     string              `json:"user_name"`

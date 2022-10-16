@@ -16,7 +16,7 @@ var upgradeConnection = websocket.Upgrader{
 }
 
 var (
-	wsChan  = make(chan models.WsPayload)
+	wsChan  = make(chan models.WsRequest)
 	clients = make(map[models.WebSocketConnection]models.WsUser)
 )
 
@@ -27,7 +27,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("ok client connectiong")
 
-	var response models.WsJsonResponse
+	var response models.WsResponse
 
 	conn := models.WebSocketConnection{Conn: ws}
 	clients[conn] = models.WsUser{}
@@ -47,13 +47,13 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 		}
 	}()
 
-	var payload models.WsPayload
+	var payload models.WsRequest
 
 	for {
 		err := conn.ReadJSON(&payload)
 
 		if err != nil {
-			// log.Println(err)
+			break
 		} else {
 			payload.Conn = *conn
 			wsChan <- payload
@@ -61,7 +61,7 @@ func ListenFowWs(conn *models.WebSocketConnection) {
 	}
 }
 
-func broadcastToAll(response models.WsJsonResponse) {
+func broadcastToAll(response models.WsResponse) {
 	for client := range clients {
 		err := client.WriteJSON(response)
 		if err != nil {
@@ -73,7 +73,7 @@ func broadcastToAll(response models.WsJsonResponse) {
 }
 
 func ListenToWsChannel() {
-	var response models.WsJsonResponse
+	var response models.WsResponse
 
 	for {
 		e := <-wsChan
