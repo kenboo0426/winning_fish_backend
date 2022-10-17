@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"log"
 	"time"
 )
@@ -8,6 +9,7 @@ import (
 type OnlineMatchJoinedUser struct {
 	ID                int       `json:"id"`
 	UserID            int       `json:"user_id"`
+	GuestUserID       string    `json:"guest_user_id"`
 	OnlineMatchID     int       `json:"online_match_id"`
 	Rank              *int      `json:"rank"`
 	RemainedTime      *float32  `json:"remained_time"`
@@ -53,19 +55,32 @@ func (o *OnlineMatchJoinedUser) UpdateOnlineMatchJoinedUser() (err error) {
 	return err
 }
 
-func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlineMatchID int) (err error) {
-	_, err = GetJoinedUsersByOnlineMatchAndUserID(onlineMatchID, userID)
+func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, guestUserID string, onlineMatchID int) (err error) {
+	_, err = GetJoinedUsersByOnlineMatchAndUserID(onlineMatchID, userID, guestUserID)
 	if err == nil {
 		return
 	}
 
-	cmd := `insert into online_match_joined_users (
-		user_id,
-		online_match_id,
-		created_at,
-		updated_at
-	) values (?, ?, ?, ?)`
-	result, err := Db.Exec(cmd, userID, onlineMatchID, time.Now(), time.Now())
+	var cmd string
+	var result sql.Result
+	if userID == "" {
+		cmd = `insert into online_match_joined_users (
+			guest_user_id,
+			online_match_id,
+			created_at,
+			updated_at
+		) values (?, ?, ?, ?)`
+		result, err = Db.Exec(cmd, guestUserID, onlineMatchID, time.Now(), time.Now())
+	} else {
+		cmd = `insert into online_match_joined_users (
+			user_id,
+			online_match_id,
+			created_at,
+			updated_at
+		) values (?, ?, ?, ?)`
+		result, err = Db.Exec(cmd, userID, onlineMatchID, time.Now(), time.Now())
+	}
+
 	id, _ := result.LastInsertId()
 	j.ID = int(id)
 
@@ -90,12 +105,13 @@ func OnlineMatchJoinedUserHasRemainedTime(online_match_id int, user_id int) (isR
 
 }
 
-func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string) (online_match_joined_user OnlineMatchJoinedUser, err error) {
-	cmd := `select id, user_id, online_match_id, created_at from online_match_joined_users where online_match_id = ? and user_id = ?`
+func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string, guest_user_id string) (online_match_joined_user OnlineMatchJoinedUser, err error) {
+	cmd := `select id, user_id, guest_user_id, online_match_id, created_at from online_match_joined_users where (online_match_id = ? and user_id = ?) or (online_match_id = ? and guest_user_id = ?)`
 	online_match_joined_user = OnlineMatchJoinedUser{}
-	err = Db.QueryRow(cmd, online_match_id, user_id).Scan(
+	err = Db.QueryRow(cmd, online_match_id, user_id, online_match_id, guest_user_id).Scan(
 		&online_match_joined_user.ID,
 		&online_match_joined_user.UserID,
+		&online_match_joined_user.GuestUserID,
 		&online_match_joined_user.OnlineMatchID,
 		&online_match_joined_user.CreatedAt,
 	)
@@ -104,8 +120,8 @@ func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string) (
 }
 
 func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users []OnlineMatchJoinedUser, err error) {
-	cmd := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name, t2.icon from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
-	rows, err := Db.Query(cmd, o.ID)
+	cmd_to_fetch_general := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name, t2.icon from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
+	rows, err := Db.Query(cmd_to_fetch_general, o.ID)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -119,6 +135,22 @@ func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users [
 		online_match_joined_users = append(online_match_joined_users, joinedUser)
 	}
 	rows.Close()
+
+	cmd_to_fetch_guest_user := `select t1.id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name, t2.icon from online_match_joined_users as t1 inner join users as t2 on t2.uuid = t1.guest_user_id where t1.online_match_id = ?`
+	rows2, err := Db.Query(cmd_to_fetch_guest_user, o.ID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for rows2.Next() {
+		var joinedUser OnlineMatchJoinedUser
+		err = rows2.Scan(&joinedUser.ID, &joinedUser.OnlineMatchID, &joinedUser.Rank, &joinedUser.RemainedTime, &joinedUser.MissAnsweredCount, &joinedUser.User.Name, &joinedUser.User.Icon)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		online_match_joined_users = append(online_match_joined_users, joinedUser)
+	}
+	rows2.Close()
 
 	return online_match_joined_users, err
 }
