@@ -49,17 +49,22 @@ func indexOnlineMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
-	user_id := r.FormValue("user_id")
+	var user_id, guest_user_id string
+	if strings.Contains(r.FormValue("user_id"), "-") {
+		guest_user_id = r.FormValue("user_id")
+	} else {
+		user_id = r.FormValue("user_id")
+	}
 	onlineMatch, err := models.GetJoinableOnlineMatch()
 	var online_match_joined_user models.OnlineMatchJoinedUser
 	if err == nil {
-		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, onlineMatch.ID)
+		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, guest_user_id, onlineMatch.ID)
 	} else {
 		onlineMatch.PersonNumber = 0
 		onlineMatch.ParticipantsNumber = 4
 		onlineMatch.Status = "opening"
 		err = onlineMatch.CreateOnlineMatch()
-		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, onlineMatch.ID)
+		online_match_joined_user.CreateOnlineMatchJoinedUser(user_id, guest_user_id, onlineMatch.ID)
 	}
 	onlineMatch.OnlineMatchJoinedUsers, err = onlineMatch.GetJoinedUsersByOnlineMatch()
 
@@ -164,12 +169,17 @@ func calculateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
 
-	user_id := r.FormValue("user_id")
+	var user_id, guest_user_id string
+	if strings.Contains(r.FormValue("user_id"), "-") {
+		user_id = r.FormValue("user_id")
+	} else {
+		guest_user_id = r.FormValue("user_id")
+	}
 	sub := strings.TrimPrefix(r.URL.Path, "/online_match/calculate")
 	_, id := filepath.Split(sub)
 	online_match_id, _ := strconv.Atoi(id)
 
-	online_match_joined_user, err := models.GetJoinedUsersByOnlineMatchAndUserID(online_match_id, user_id)
+	online_match_joined_user, err := models.GetJoinedUsersByOnlineMatchAndUserID(online_match_id, user_id, guest_user_id)
 
 	if err != nil {
 		log.Fatalln(err)
