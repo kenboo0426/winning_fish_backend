@@ -105,15 +105,23 @@ func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
 
 	online_match_id, _ := strconv.Atoi(id)
 	online_match, err := models.GetOnlineMatch(online_match_id)
+	users, _ := online_match.GetJoinedUsersByOnlineMatch()
+
 	if err != nil {
-		log.Fatalln(err)
+		w.WriteHeader(404)
+		return
+	}
+	if len(users) > 4 || len(users) <= 1 {
+		w.WriteHeader(404)
+		return
 	}
 	online_match.Status = "processing"
 	err = online_match.UpdateOnlineMatch()
 	online_match.RegisterQuiz()
 
 	if err != nil {
-		log.Fatalln(err)
+		w.WriteHeader(404)
+		return
 	}
 
 	res, _ := json.Marshal(online_match)
