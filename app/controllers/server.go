@@ -12,7 +12,6 @@ func StartMainServer() error {
 	http.HandleFunc("/quiz", HandleQuizRequst)
 	// ↑↓の順番注意
 	http.HandleFunc("/quiz/", HandleQuizUpdateRequest)
-	http.HandleFunc("/online_matches", indexOnlineMatch)
 	http.HandleFunc("/socket", startWebSocket)
 	go ListenToWsChannel()
 	http.HandleFunc("/online_match/start/", startOnlineMatch)

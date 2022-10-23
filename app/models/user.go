@@ -28,7 +28,7 @@ func (u *User) CreateUser() (err error) {
 		role,
 		icon,
 		created_at
-	) values(?, ?, ? , ?, ?, ?)`
+	) values(?, ?, ?, ?, ?, ?)`
 
 	result, err := Db.Exec(createUser, u.UUID, u.Name, u.Email, u.Role, u.Icon, time.Now())
 	id, _ := result.LastInsertId()
