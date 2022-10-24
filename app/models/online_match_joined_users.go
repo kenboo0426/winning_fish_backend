@@ -60,12 +60,13 @@ func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlin
 	}
 
 	cmd := `insert into online_match_joined_users (
-		user_id,
-		online_match_id,
-		created_at,
-		updated_at
-	) values (?, ?, ?, ?)`
+			user_id,
+			online_match_id,
+			created_at,
+			updated_at
+		) values (?, ?, ?, ?)`
 	result, err := Db.Exec(cmd, userID, onlineMatchID, time.Now(), time.Now())
+
 	id, _ := result.LastInsertId()
 	j.ID = int(id)
 
@@ -104,8 +105,8 @@ func GetJoinedUsersByOnlineMatchAndUserID(online_match_id int, user_id string) (
 }
 
 func (o *OnlineMatch) GetJoinedUsersByOnlineMatch() (online_match_joined_users []OnlineMatchJoinedUser, err error) {
-	cmd := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name, t2.icon from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
-	rows, err := Db.Query(cmd, o.ID)
+	cmd_to_fetch_general := `select t1.id, t1.user_id, t1.online_match_id, t1.rank, t1.remained_time, t1.miss_answered_count, t2.name, t2.icon from online_match_joined_users as t1 inner join users as t2 on t2.id = t1.user_id where t1.online_match_id = ?`
+	rows, err := Db.Query(cmd_to_fetch_general, o.ID)
 	if err != nil {
 		log.Fatalln(err)
 	}
