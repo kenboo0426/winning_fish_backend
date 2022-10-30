@@ -10,7 +10,7 @@ type OnlineMatchJoinedUser struct {
 	UserID            int       `json:"user_id"`
 	OnlineMatchID     int       `json:"online_match_id"`
 	Rank              *int      `json:"rank"`
-	RemainedTime      *float32  `json:"remained_time"`
+	RemainedTime      *float64  `json:"remained_time"`
 	MissAnsweredCount *int      `json:"miss_answered_count"`
 	Score             *int      `json:"score"`
 	CreatedAt         time.Time `json:"created_at"`

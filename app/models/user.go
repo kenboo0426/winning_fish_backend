@@ -14,7 +14,7 @@ type User struct {
 	UUID      string    `json:"uuid"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Rating    *float32  `json:"rating"`
+	Rating    *float64  `json:"rating"`
 	Role      int       `json:"role"` // 0: general 1: admin 2: guests
 	Icon      *string   `json:"icon"`
 	CreatedAt time.Time `json:"created_at"`

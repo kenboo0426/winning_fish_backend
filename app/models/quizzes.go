@@ -9,7 +9,7 @@ import (
 type Quiz struct {
 	ID          int         `json:"id"`
 	CorrectID   int         `json:"correct_id"`
-	CorrectRate *float32    `json:"correct_rate"`
+	CorrectRate *float64    `json:"correct_rate"`
 	Level       string      `json:"level"`
 	CreatedAt   time.Time   `json:"created_at"`
 	Options     []Option    `json:"options"`
