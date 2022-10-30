@@ -33,8 +33,7 @@ func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		online_match_joined_user.CreateOnlineMatchJoinedUser(user_or_guest_id, onlineMatch.ID)
 	} else {
-		onlineMatch.PersonNumber = 0
-		onlineMatch.ParticipantsNumber = 4
+		onlineMatch.MaxParticipantNumber = 4
 		onlineMatch.Status = "opening"
 		err = onlineMatch.CreateOnlineMatch()
 		online_match_joined_user.CreateOnlineMatchJoinedUser(user_or_guest_id, onlineMatch.ID)

@@ -6,13 +6,15 @@ import (
 )
 
 type OnlineMatch struct {
-	ID                 int        `json:"id"`
-	PersonNumber       int        `json:"person_number"`
-	ParticipantsNumber int        `json:"participants_number"`
-	StartedAt          *time.Time `json:"started_at"`
-	FinishedAt         *time.Time `json:"finished_at"`
-	Status             string     `json:"status"` // opening, processing, finishied
-	// RemainingWaitTime  float32   `json:"remaining_wait_time"`
+	ID                   int        `json:"id"`
+	MaxParticipantNumber int        `json:"max_participant_number"`
+	StartedAt            *time.Time `json:"started_at"`
+	FinishedAt           *time.Time `json:"finished_at"`
+	Status               string     `json:"status"` // opening, processing, finishied
+	// RemainingWaitTime  float64   `json:"remaining_wait_time"`
+	QuestionNumber          int                     `json:"question_number"`
+	WithBot                 bool                    `json:"with_bot"`
+	RoomID                  *string                 `json:"room_id"`
 	CreatedAt               *time.Time              `json:"created_at"`
 	UpdatedAt               *time.Time              `json:"updated_at"`
 	OnlineMatchJoinedUsers  []OnlineMatchJoinedUser `json:"online_match_joined_users"`
@@ -20,14 +22,16 @@ type OnlineMatch struct {
 }
 
 func GetOnlineMatch(id int) (online_match OnlineMatch, err error) {
-	cmd := `select id,person_number,participants_number,started_at,finished_at,status,created_at,updated_at from online_matches where id = ?`
+	cmd := `select id,max_participant_number,started_at,finished_at,status,question_number,with_bot,room_id,created_at,updated_at from online_matches where id = ?`
 	err = Db.QueryRow(cmd, id).Scan(
 		&online_match.ID,
-		&online_match.PersonNumber,
-		&online_match.ParticipantsNumber,
+		&online_match.MaxParticipantNumber,
 		&online_match.StartedAt,
 		&online_match.FinishedAt,
 		&online_match.Status,
+		&online_match.QuestionNumber,
+		&online_match.WithBot,
+		&online_match.RoomID,
 		&online_match.CreatedAt,
 		&online_match.UpdatedAt,
 	)
@@ -39,15 +43,17 @@ func GetOnlineMatch(id int) (online_match OnlineMatch, err error) {
 }
 
 func GetJoinableOnlineMatch() (online_match OnlineMatch, err error) {
-	cmd := `select online_matches.id, online_matches.person_number, online_matches.participants_number, online_matches.started_at, online_matches.finished_at, online_matches.status, online_matches.created_at, online_matches.updated_at from online_matches left join online_match_joined_users on online_match_joined_users.online_match_id = online_matches.id where online_matches.status = ? group by online_matches.id having count(online_matches.id) < ?`
+	cmd := `select t1.id, t1.participants_number, t1.started_at, t1.finished_at, t1.status, t1.question_number, t1.with_bot, t1.room_id, t1.created_at, t1.updated_at from t1 left join online_match_joined_users on online_match_joined_users.online_match_id = t1.id where t1.status = ? group by t1.id having count(t1.id) < ?`
 
 	err = Db.QueryRow(cmd, "opening", 4).Scan(
 		&online_match.ID,
-		&online_match.PersonNumber,
-		&online_match.ParticipantsNumber,
+		&online_match.MaxParticipantNumber,
 		&online_match.StartedAt,
 		&online_match.FinishedAt,
 		&online_match.Status,
+		&online_match.QuestionNumber,
+		&online_match.WithBot,
+		&online_match.RoomID,
 		&online_match.CreatedAt,
 		&online_match.UpdatedAt,
 	)
@@ -57,14 +63,13 @@ func GetJoinableOnlineMatch() (online_match OnlineMatch, err error) {
 
 func (o *OnlineMatch) CreateOnlineMatch() (err error) {
 	cmd := `insert into online_matches (
-		person_number,
-		participants_number,
+		max_participant_number,
 		status,
 		created_at,
 		updated_at
 	) values(?, ?, ?, ?, ?)`
 
-	result, err := Db.Exec(cmd, o.PersonNumber, o.ParticipantsNumber, o.Status, time.Now(), time.Now())
+	result, err := Db.Exec(cmd, o.MaxParticipantNumber, o.Status, time.Now(), time.Now())
 	id, _ := result.LastInsertId()
 	o.ID = int(id)
 
