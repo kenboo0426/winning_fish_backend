@@ -64,6 +64,7 @@ func findOrCreateUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user.CreatedAt = time.Now()
 		user.CreateUser()
+		w.WriteHeader(201)
 	}
 	res, _ := json.Marshal(user)
 	w.Write(res)
