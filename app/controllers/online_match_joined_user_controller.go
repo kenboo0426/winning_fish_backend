@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -12,13 +14,11 @@ import (
 )
 
 func HandleOnlineMatchRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	permitCors(w, r)
 
 	switch r.Method {
 	case http.MethodPost:
-		joinOrCreateOnlineMatch(w, r)
+		createOnlineMatch(w, r)
 	case http.MethodOptions:
 		// handle preflight here
 	default:
@@ -26,14 +26,35 @@ func HandleOnlineMatchRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func createOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	var online_match models.OnlineMatch
+	defer r.Body.Close()
+
+	body, _ := io.ReadAll(r.Body)
+	if err := json.Unmarshal(body, &online_match); err != nil {
+		fmt.Println(err)
+	}
+	online_match.Status = "opening"
+	err := online_match.CreateOnlineMatch()
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	res, _ := json.Marshal(online_match)
+	w.WriteHeader(201)
+	w.Write(res)
+}
+
 func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	permitCors(w, r)
 	user_or_guest_id := r.FormValue("user_or_guest_id")
 	onlineMatch, err := models.GetJoinableOnlineMatch()
 	var online_match_joined_user models.OnlineMatchJoinedUser
 	if err == nil {
 		online_match_joined_user.CreateOnlineMatchJoinedUser(user_or_guest_id, onlineMatch.ID)
 	} else {
-		onlineMatch.MaxParticipantNumber = 4
+		onlineMatch.MaxParticipateNumber = 4
 		onlineMatch.Status = "opening"
 		err = onlineMatch.CreateOnlineMatch()
 		online_match_joined_user.CreateOnlineMatchJoinedUser(user_or_guest_id, onlineMatch.ID)
@@ -50,9 +71,7 @@ func joinOrCreateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func calculateOnlineMatch(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	permitCors(w, r)
 
 	joined_user_id := r.FormValue("joined_user_id")
 	sub := strings.TrimPrefix(r.URL.Path, "/online_match/calculate")
@@ -81,4 +100,10 @@ func calculateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 
 	res, _ := json.Marshal(online_match)
 	w.Write(res)
+}
+
+func permitCors(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
 }
