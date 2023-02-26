@@ -22,11 +22,41 @@ func HandleOnlineMatchUpdateRequest(w http.ResponseWriter, r *http.Request) {
 		showOnlineMatch(w, r)
 	case http.MethodPut:
 		updateOnlineMatch(w, r)
+	case http.MethodPost:
+		s := r.URL.Path[len("/online_match/"):]
+		if strings.Contains(s, "/") && strings.Contains(s, "join") {
+			joinOnlineMatch(w, r)
+		} else {
+			w.WriteHeader(405)
+		}
 	case http.MethodOptions:
 		// handle preflight here
 	default:
 		w.WriteHeader(405)
 	}
+}
+
+func joinOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	user_or_guest_id := r.FormValue("user_or_guest_id")
+	s := strings.Trim(r.URL.Path, "/online_match/")
+	onlineMatchID, err := strconv.Atoi(strings.Trim(s, "/join"))
+	if err != nil {
+		w.WriteHeader(401)
+		return
+	}
+	var online_match_joined_user models.OnlineMatchJoinedUser
+	err = online_match_joined_user.CreateOnlineMatchJoinedUser(user_or_guest_id, onlineMatchID)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	onlineMatch, err := models.GetOnlineMatch(onlineMatchID)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	res, _ := json.Marshal(onlineMatch)
+	w.Write(res)
 }
 
 func showOnlineMatch(w http.ResponseWriter, r *http.Request) {

@@ -17,6 +17,7 @@ func StartMainServer() error {
 	http.HandleFunc("/online_match/start/", startOnlineMatch)
 	http.HandleFunc("/online_match/finish/", finishOnlineMatch)
 	http.HandleFunc("/online_match/calculate/", calculateOnlineMatch)
+	http.HandleFunc("/online_match/join_or_create", joinOrCreateOnlineMatch)
 	http.HandleFunc("/online_match", HandleOnlineMatchRequest)
 	// ↑↓の順番注意
 	http.HandleFunc("/online_match/", HandleOnlineMatchUpdateRequest)
