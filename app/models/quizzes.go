@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-	"log"
 	"time"
 )
 
@@ -20,7 +18,7 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 	fetchQuizzes := `select * from quizzes`
 	rows, err := Db.Query(fetchQuizzes)
 	if err != nil {
-		log.Fatalln(err)
+		return quizzes, err
 	}
 	for rows.Next() {
 		quiz := &Quiz{}
@@ -33,21 +31,21 @@ func GetQuizzes() (quizzes []Quiz, err error) {
 		)
 		quiz.Options, _ = quiz.GetOptionsByQuiz()
 		if err != nil {
-			log.Fatalln(err)
+			return quizzes, err
 		}
 		quizzes = append(quizzes, *quiz)
 	}
 	rows.Close()
-	return quizzes, err
+	return quizzes, nil
 }
 
 func GetQuizzesByRandomAndLimitFive() (quizzes []Quiz, err error) {
 	cmd := `select * from quizzes order by random() limit 5`
 	rows, err := Db.Query(cmd)
 	if err != nil {
-		log.Fatalln(err)
+		return quizzes, err
 	}
-	
+
 	for rows.Next() {
 		quiz := &Quiz{}
 		err = rows.Scan(
@@ -58,7 +56,7 @@ func GetQuizzesByRandomAndLimitFive() (quizzes []Quiz, err error) {
 			&quiz.CreatedAt,
 		)
 		if err != nil {
-			log.Fatalln(err)
+			return quizzes, err
 		}
 		quizzes = append(quizzes, *quiz)
 	}
@@ -69,7 +67,7 @@ func GetQuizzesByRandomAndLimitFive() (quizzes []Quiz, err error) {
 	quizzes = quizzes[:5]
 
 	rows.Close()
-	return quizzes, err
+	return quizzes, nil
 }
 
 func GetQuiz(id int) (quiz Quiz, err error) {
@@ -83,14 +81,13 @@ func GetQuiz(id int) (quiz Quiz, err error) {
 		&quiz.CreatedAt,
 	)
 	if err != nil {
-		log.Fatalln(err)
+		return quiz, err
 	}
 	quiz.Options, err = quiz.GetOptionsByQuiz()
-	quiz.QuizImages, err = quiz.GetQuizImagesByQuiz()
 	if err != nil {
-		log.Fatalln(err)
+		return quiz, err
 	}
-
+	quiz.QuizImages, err = quiz.GetQuizImagesByQuiz()
 	return quiz, err
 }
 
@@ -101,11 +98,10 @@ func (q *Quiz) CreateQuiz() (id int64, err error) {
 	) values(?, ?)`
 
 	result, err := Db.Exec(createQuiz, q.Level, time.Now())
-	id, _ = result.LastInsertId()
 	if err != nil {
-		log.Fatalln(err)
+		return id, err
 	}
-
+	id, err = result.LastInsertId()
 	return id, err
 }
 
@@ -115,11 +111,10 @@ func (q *Quiz) UpdateQuiz() (err error) {
 																										created_at = ? 
 																										where id = ?`)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	_, err = updateQuiz.Exec(q.CorrectID, q.Level, q.CreatedAt, q.ID)
-
 	return err
 }
 
@@ -127,8 +122,5 @@ func DeleteQuiz(id int) (quiz Quiz, err error) {
 	delete := "delete from quizzes where id = ?"
 
 	_, err = Db.Exec(delete, id)
-	if err != nil {
-		fmt.Println(err)
-	}
 	return quiz, err
 }

@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/joho/godotenv"
 	"gopkg.in/go-ini/ini.v1"
 )
@@ -23,7 +21,7 @@ func init() {
 func LoadConfig() {
 	cfg, err := ini.Load("config.ini")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	Config = ConfigList{
 		Port:      cfg.Section("web").Key("port").MustString("3000"),
@@ -35,6 +33,6 @@ func LoadConfig() {
 func LoadEnv() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 }

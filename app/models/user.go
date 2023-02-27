@@ -3,7 +3,6 @@ package models
 import (
 	"crypto/sha1"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -56,18 +55,12 @@ func GetUserByIDOrUUID(id int, uuid string) (user User, err error) {
 func (u *User) UpdateUser() (err error) {
 	updateUser := `update users set name = ?, email = ?, role = ?, rating = ? where id = ?`
 	_, err = Db.Exec(updateUser, u.Name, u.Email, u.Rating, u.Role, u.ID)
-	if err != nil {
-		log.Fatalln(err)
-	}
 	return err
 }
 
 func (u *User) DeleteUser() (err error) {
 	deleteUser := `delete from users where id = ?`
 	_, err = Db.Exec(deleteUser, u.ID)
-	if err != nil {
-		log.Fatalln(err)
-	}
 	return err
 }
 
