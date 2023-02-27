@@ -50,7 +50,7 @@ func joinOnlineMatch(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	onlineMatch, err := models.GetOnlineMatch(onlineMatchID)
+	onlineMatch, err := models.GetOnlineMatchByID(onlineMatchID)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -64,7 +64,7 @@ func showOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	_, id := filepath.Split(sub)
 
 	online_match_id, _ := strconv.Atoi(id)
-	onlineMatch, err := models.GetOnlineMatch(online_match_id)
+	onlineMatch, err := models.GetOnlineMatchByID(online_match_id)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -91,7 +91,7 @@ func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	_, id := filepath.Split(sub)
 
 	online_match_id, _ := strconv.Atoi(id)
-	online_match, err := models.GetOnlineMatch(online_match_id)
+	online_match, err := models.GetOnlineMatchByID(online_match_id)
 	users, _ := online_match.GetJoinedUsersByOnlineMatch()
 
 	if err != nil {
@@ -115,6 +115,21 @@ func startOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func searchOnlineMatch(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	sub := strings.TrimPrefix(r.URL.Path, "/online_match/search/")
+	_, roomID := filepath.Split(sub)
+	onlineMatch, err := models.GetOnlineMatchByRoomID(roomID)
+	if err != nil {
+		w.WriteHeader(404)
+		return
+	}
+	res, _ := json.Marshal(onlineMatch)
+	w.Write(res)
+}
+
 func finishOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -124,7 +139,7 @@ func finishOnlineMatch(w http.ResponseWriter, r *http.Request) {
 	_, id := filepath.Split(sub)
 
 	online_match_id, _ := strconv.Atoi(id)
-	online_match, err := models.GetOnlineMatch(online_match_id)
+	online_match, err := models.GetOnlineMatchByID(online_match_id)
 	if err != nil {
 		log.Fatalln(err)
 	}
