@@ -84,7 +84,7 @@ func calculateOnlineMatch(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 	err = online_match_joined_user.CalculateRemainedTimeByOnlineMatchID()
-	online_match, err := models.GetOnlineMatch(online_match_id)
+	online_match, err := models.GetOnlineMatchByID(online_match_id)
 	if err != nil {
 		log.Fatalln(err)
 	}

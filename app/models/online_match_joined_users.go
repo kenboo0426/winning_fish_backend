@@ -56,7 +56,7 @@ func (o *OnlineMatchJoinedUser) UpdateOnlineMatchJoinedUser() (err error) {
 func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlineMatchID int) (err error) {
 	_, err = GetJoinedUsersByOnlineMatchAndUserID(onlineMatchID, userID)
 	if err == nil {
-		return
+		return nil
 	}
 
 	cmd := `insert into online_match_joined_users (
@@ -66,11 +66,16 @@ func (j *OnlineMatchJoinedUser) CreateOnlineMatchJoinedUser(userID string, onlin
 			updated_at
 		) values (?, ?, ?, ?)`
 	result, err := Db.Exec(cmd, userID, onlineMatchID, time.Now(), time.Now())
-
-	id, _ := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
 	j.ID = int(id)
 
-	return err
+	return nil
 }
 
 func OnlineMatchJoinedUserHasRemainedTime(online_match_id int, user_id int) (isRemainedTime bool, err error) {
